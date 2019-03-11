@@ -1,63 +1,10 @@
 #include <iostream>
-#include <vector>
-#include <set>
-#include <memory>
+#include <stack>
 #include <chrono>
 
-using namespace std;
+#include "operators.h"
+
 using namespace std::chrono;
-
-struct Position
-{
-	int i;
-	int j;
-
-	bool operator==(const Position &other) const
-	{
-		return i == other.i && j == other.j;
-	}
-
-	bool operator<(const Position &other) const
-	{
-		if(i < other.i)
-			return true;
-
-		if(i > other.i)
-			return false;
-
-		return j < other.j;
-	}
-};
-
-struct State
-{
-	Position pos1;
-	Position pos2;
-	shared_ptr<State> parent;
-
-	bool operator==(const State &other) const
-	{
-		return pos1 == other.pos1;
-	}
-
-	bool operator<(const State &other) const
-	{
-		return pos1 < other.pos1;
-	}
-};
-
-bool operator==( const shared_ptr<State>& lhs, const shared_ptr<State>& rhs )
-{
-	if(lhs == nullptr || rhs == nullptr)
-		return false;
-
-	return (*lhs) == (*rhs);
-}
-
-bool operator<( const shared_ptr<State>& lhs, const shared_ptr<State>& rhs )
-{
-	return (*lhs) < (*rhs);
-}
 
 int nodes = 0;
 vector<vector<char>> map = {
@@ -76,6 +23,7 @@ shared_ptr<State> analyzeMap()
 	shared_ptr<State> start(new State);
 	start->parent = nullptr;
 	Position pos;
+	bool lying = false;
 
 	for (int i = 0; i < map.size(); ++i)
 		for (int j = 0; j < map[i].size(); ++j)
@@ -86,9 +34,27 @@ shared_ptr<State> analyzeMap()
 				pos.j = j;
 				possible.insert(pos);
 				break;
+			case '-':
+				if (lying)
+				{
+					start->pos2.i = i;
+					start->pos2.j = j;
+				}
+				else
+				{
+					start->pos1.i = i;
+					start->pos1.j = j;
+					lying = true;
+				}
+				pos.i = i;
+				pos.j = j;
+				possible.insert(pos);
+				break;
 			case '|':
 				start->pos1.i = i;
 				start->pos1.j = j;
+				start->pos2.i = -1;
+				start->pos2.j = -1;
 				pos.i = i;
 				pos.j = j;
 				possible.insert(pos);
@@ -96,6 +62,9 @@ shared_ptr<State> analyzeMap()
 			case '_':
 				goal.i = i;
 				goal.j = j;
+				pos.i = i;
+				pos.j = j;
+				possible.insert(pos);
 				break;
 			default:
 				break;
@@ -139,7 +108,16 @@ void displayMap(const shared_ptr<State> &state)
 				else
 				{
 					if (state->pos1.i == i / 2 && state->pos1.j == j / 2)
-						cout << " | ";
+					{
+						if (state->pos2.i == -1 && state->pos2.j == -1)
+							cout << " | ";
+
+						else
+							cout << " - ";
+					}
+
+					else if (state->pos2.i == i / 2 && state->pos2.j == j / 2)
+						cout << " - ";
 
 					else if (map[i / 2][j / 2] == '|')
 						cout << " g ";
@@ -164,80 +142,16 @@ void displayMap(const shared_ptr<State> &state)
 	cout << endl;
 }
 
-bool up(shared_ptr<State> &state)
-{
-	Position pos;
-	pos.i = state->pos1.i - 1;
-	pos.j = state->pos1.j;
-
-	if (goal == pos || possible.find(pos) != possible.end())
-	{
-		state->pos1 = pos;
-		return true;
-	}
-
-	return false;
-}
-
-bool left(shared_ptr<State> &state)
-{
-	Position pos;
-	pos.i = state->pos1.i;
-	pos.j = state->pos1.j - 1;
-
-	if (goal == pos || possible.find(pos) != possible.end())
-	{
-		state->pos1 = pos;
-		return true;
-	}
-
-	return false;
-}
-
-bool right(shared_ptr<State> &state)
-{
-	Position pos;
-	pos.i = state->pos1.i;
-	pos.j = state->pos1.j + 1;
-
-	if (goal == pos || possible.find(pos) != possible.end())
-	{
-		state->pos1 = pos;
-		return true;
-	}
-
-	return false;
-}
-
-bool down(shared_ptr<State> &state)
-{
-	Position pos;
-	pos.i = state->pos1.i + 1;
-	pos.j = state->pos1.j;
-
-	if (goal == pos || possible.find(pos) != possible.end())
-	{
-		state->pos1 = pos;
-		return true;
-	}
-
-	return false;
-}
-
-typedef bool (*Operators)(shared_ptr<State> &state);
-
-vector<Operators> operators = {up, left, right, down};
-
 bool checkDone(const shared_ptr<State> &state)
 {
-	return state->pos1 == goal;
+	return state->pos1 == goal && state->pos2.i == -1 && state->pos2.j == -1;
 }
 
 bool findDuplicate(shared_ptr<State> parent, shared_ptr<State> child)
 {
-	while(parent != nullptr)
+	while (parent != nullptr)
 	{
-		if(parent == child)
+		if (parent == child)
 			return true;
 
 		parent = parent->parent;
@@ -262,10 +176,10 @@ shared_ptr<State> breadthFirstSearch(vector<shared_ptr<State>> &states)
 		{
 			shared_ptr<State> new_state(new State);
 			new_state->pos1 = states[0]->pos1;
+			new_state->pos2 = states[0]->pos2;
 			new_state->parent = states[0];
-			
 
-			if (operators[i](new_state) && !findDuplicate(states[0],new_state))
+			if (operators[i](new_state) && !findDuplicate(states[0], new_state))
 			{
 				states.push_back(new_state);
 				++nodes;
@@ -294,12 +208,12 @@ shared_ptr<State> depthFirstSearch(vector<shared_ptr<State>> &states)
 		{
 			shared_ptr<State> new_state(new State);
 			new_state->pos1 = states[0]->pos1;
+			new_state->pos2 = states[0]->pos2;
 			new_state->parent = states[0];
-			
 
-			if (operators[i](new_state) && !findDuplicate(states[0],new_state))
+			if (operators[i](new_state) && !findDuplicate(states[0], new_state))
 			{
-				states.insert(states.begin()+1, new_state);
+				states.insert(states.begin() + 1, new_state);
 				++nodes;
 			}
 		}
@@ -308,6 +222,27 @@ shared_ptr<State> depthFirstSearch(vector<shared_ptr<State>> &states)
 	}
 
 	return res;
+}
+
+void displaySolution(shared_ptr<State> state)
+{
+	stack<shared_ptr<State>> way;
+
+	while (state != nullptr)
+	{
+		way.push(state);
+		state = state->parent;
+	}
+
+	getchar();
+
+	while (!way.empty())
+	{
+		cout << "\n\n\n\n\n";
+		displayMap(way.top());
+		way.pop();
+		getchar();
+	}
 }
 
 int main()
@@ -320,15 +255,15 @@ int main()
 	++nodes;
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	shared_ptr<State> end = breadthFirstSearch(states);
+	shared_ptr<State> end = depthFirstSearch(states);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	auto duration = duration_cast<microseconds>(t2 - t1).count();
-	
-	cout << "Duration: " << (float) duration / 1000000 << " seconds.\n";
+
+	cout << "Duration: " << (float)duration / 1000000 << " seconds.\n";
 	cout << "Nodes: " << nodes << ".\n";
 
-	displayMap(end);
+	displaySolution(end);
 
 	return 0;
 }
