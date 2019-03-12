@@ -2,12 +2,14 @@
 #include <stack>
 #include <chrono>
 
+#include <SFML/Graphics.hpp>
+
 #include "operators.h"
 
 using namespace std::chrono;
 
 int nodes = 0;
-vector<vector<char>> map = {
+vector<vector<char>> puzzle = {
 	{'g', 'g', 'g', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 	{'g', '|', 'g', 'g', 'g', 'g', ' ', ' ', ' ', ' '},
 	{'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', ' '},
@@ -18,16 +20,16 @@ vector<vector<char>> map = {
 set<Position> possible;
 Position goal;
 
-shared_ptr<State> analyzeMap()
+shared_ptr<State> analyzepuzzle()
 {
 	shared_ptr<State> start(new State);
 	start->parent = nullptr;
 	Position pos;
 	bool lying = false;
 
-	for (int i = 0; i < map.size(); ++i)
-		for (int j = 0; j < map[i].size(); ++j)
-			switch (map[i][j])
+	for (int i = 0; i < puzzle.size(); ++i)
+		for (int j = 0; j < puzzle[i].size(); ++j)
+			switch (puzzle[i][j])
 			{
 			case 'g':
 				pos.i = i;
@@ -73,12 +75,12 @@ shared_ptr<State> analyzeMap()
 	return start;
 }
 
-void displayMap(const shared_ptr<State> &state)
+void displaypuzzle(const shared_ptr<State> &state)
 {
 	cout << endl;
 	cout << " ";
 	int i = 1, j;
-	for (j = 0; j <= 4 * map[0].size(); j++)
+	for (j = 0; j <= 4 * puzzle[0].size(); j++)
 	{
 		if (j % 4 == 2)
 			cout << i++;
@@ -86,11 +88,11 @@ void displayMap(const shared_ptr<State> &state)
 			cout << " ";
 	}
 	cout << endl;
-	for (i = 0; i <= 2 * map.size(); i++)
+	for (i = 0; i <= 2 * puzzle.size(); i++)
 	{
 		if (i % 2 != 0)
 			cout << (char)(i / 2 + 'A');
-		for (j = 0; j <= 2 * map[0].size(); j++)
+		for (j = 0; j <= 2 * puzzle[0].size(); j++)
 		{
 			if (i % 2 == 0)
 			{
@@ -119,11 +121,11 @@ void displayMap(const shared_ptr<State> &state)
 					else if (state->pos2.i == i / 2 && state->pos2.j == j / 2)
 						cout << " - ";
 
-					else if (map[i / 2][j / 2] == '|')
+					else if (puzzle[i / 2][j / 2] == '|')
 						cout << " g ";
 
 					else
-						cout << ' ' << map[i / 2][j / 2] << ' ';
+						cout << ' ' << puzzle[i / 2][j / 2] << ' ';
 				}
 			}
 		}
@@ -132,7 +134,7 @@ void displayMap(const shared_ptr<State> &state)
 		cout << endl;
 	}
 	cout << " ";
-	for (j = 0, i = 1; j <= 4 * map[0].size(); j++)
+	for (j = 0, i = 1; j <= 4 * puzzle[0].size(); j++)
 	{
 		if (j % 4 == 2)
 			cout << i++;
@@ -239,15 +241,68 @@ void displaySolution(shared_ptr<State> state)
 	while (!way.empty())
 	{
 		cout << "\n\n\n\n\n";
-		displayMap(way.top());
+		displaypuzzle(way.top());
 		way.pop();
 		getchar();
 	}
 }
 
-int main()
+void gui()
 {
-	shared_ptr<State> start = analyzeMap();
+	sf::RenderWindow window(sf::VideoMode(800, 600), "Roll Block", sf::Style::Default);
+	sf::Image img;
+
+	img.loadFromFile("roll_block.png");
+	window.setIcon(img.getSize().x, img.getSize().y, img.getPixelsPtr());
+
+	sf::RectangleShape rectangle(sf::Vector2f(50.f, 50.f));
+
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			switch (event.type)
+			{
+			case sf::Event::Closed:
+				window.close();
+				break;
+
+			case sf::Event::KeyReleased:
+				if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)
+				{
+					rectangle.move(sf::Vector2f(0.f, -5.f));
+				}
+				if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left)
+				{
+					rectangle.move(sf::Vector2f(-5.f, 0.f));
+				}
+				if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right)
+				{
+					rectangle.move(sf::Vector2f(5.f, 0.f));
+				}
+				if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down)
+				{
+					rectangle.move(sf::Vector2f(0.f, 5.f));
+				}
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		window.clear(sf::Color::Black);
+
+		window.draw(rectangle);
+
+		window.display();
+	}
+}
+
+void solve()
+{
+	shared_ptr<State> start = analyzepuzzle();
 
 	vector<shared_ptr<State>> states;
 
@@ -264,6 +319,37 @@ int main()
 	cout << "Nodes: " << nodes << ".\n";
 
 	displaySolution(end);
+
+	possible.clear();
+	nodes = 0;
+}
+
+void menu()
+{
+	char temp = '\n';
+	while (temp != '0')
+	{
+		cout << "  _____       _ _   ____  _            _     \n"
+			 << " |  __ \\     | | | |  _ \\| |          | |    \n"
+			 << " | |__) |___ | | | | |_) | | ___   ___| | __ \n"
+			 << " |  _  // _ \\| | | |  _ <| |/ _ \\ / __| |/ / \n"
+			 << " | | \\ \\ (_) | | | | |_) | | (_) | (__|   <  \n"
+			 << " |_|  \\_\\___/|_|_| |____/|_|\\___/ \\___|_|\\_\\ \n";
+
+		cout << "\n\n\n\n1. Solve\n0. Exit\n\n\n";
+
+		temp = getchar();
+
+		if(temp == '1')
+			solve();
+	}
+}
+
+int main()
+{
+	//gui();
+	
+	menu();
 
 	return 0;
 }

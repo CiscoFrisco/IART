@@ -55,7 +55,7 @@ struct State
 
 typedef bool (*Operators)(shared_ptr<State> &state);
 extern vector<Operators> operators;
-extern vector<vector<char>> map;
+extern vector<vector<char>> puzzle;
 extern set<Position> possible;
 extern Position goal;
 
