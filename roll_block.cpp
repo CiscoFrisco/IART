@@ -1,10 +1,16 @@
 #include <iostream>
 #include <stack>
 #include <chrono>
+#include <conio.h>
 
-#include <SFML/Graphics.hpp>
+// #include <SFML/Graphics.hpp>
 
 #include "operators.h"
+
+#define KEY_UP 72
+#define KEY_DOWN 80
+#define KEY_LEFT 75
+#define KEY_RIGHT 77
 
 using namespace std::chrono;
 
@@ -247,57 +253,105 @@ void displaySolution(shared_ptr<State> state)
 	}
 }
 
-void gui()
+// void gui()
+// {
+// 	sf::RenderWindow window(sf::VideoMode(800, 600), "Roll Block", sf::Style::Default);
+// 	sf::Image img;
+
+// 	img.loadFromFile("roll_block.png");
+// 	window.setIcon(img.getSize().x, img.getSize().y, img.getPixelsPtr());
+
+// 	sf::RectangleShape rectangle(sf::Vector2f(50.f, 50.f));
+
+// 	while (window.isOpen())
+// 	{
+// 		sf::Event event;
+// 		while (window.pollEvent(event))
+// 		{
+// 			switch (event.type)
+// 			{
+// 			case sf::Event::Closed:
+// 				window.close();
+// 				break;
+
+// 			case sf::Event::KeyReleased:
+// 				if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)
+// 				{
+// 					rectangle.move(sf::Vector2f(0.f, -5.f));
+// 				}
+// 				if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left)
+// 				{
+// 					rectangle.move(sf::Vector2f(-5.f, 0.f));
+// 				}
+// 				if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right)
+// 				{
+// 					rectangle.move(sf::Vector2f(5.f, 0.f));
+// 				}
+// 				if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down)
+// 				{
+// 					rectangle.move(sf::Vector2f(0.f, 5.f));
+// 				}
+// 				break;
+
+// 			default:
+// 				break;
+// 			}
+// 		}
+
+// 		window.clear(sf::Color::Black);
+
+// 		window.draw(rectangle);
+
+// 		window.display();
+// 	}
+// }
+
+void play()
 {
-	sf::RenderWindow window(sf::VideoMode(800, 600), "Roll Block", sf::Style::Default);
-	sf::Image img;
+	shared_ptr<State> game_info = analyzepuzzle();
+	bool lost = false;
+	char c;
 
-	img.loadFromFile("roll_block.png");
-	window.setIcon(img.getSize().x, img.getSize().y, img.getPixelsPtr());
+	while (!lost)
+	{	
+		displaypuzzle(game_info);
 
-	sf::RectangleShape rectangle(sf::Vector2f(50.f, 50.f));
+		if (checkDone(game_info))
+			break;
 
-	while (window.isOpen())
-	{
-		sf::Event event;
-		while (window.pollEvent(event))
+		switch ((c = getch()))
 		{
-			switch (event.type)
-			{
-			case sf::Event::Closed:
-				window.close();
-				break;
-
-			case sf::Event::KeyReleased:
-				if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)
-				{
-					rectangle.move(sf::Vector2f(0.f, -5.f));
-				}
-				if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left)
-				{
-					rectangle.move(sf::Vector2f(-5.f, 0.f));
-				}
-				if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right)
-				{
-					rectangle.move(sf::Vector2f(5.f, 0.f));
-				}
-				if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down)
-				{
-					rectangle.move(sf::Vector2f(0.f, 5.f));
-				}
-				break;
-
-			default:
-				break;
-			}
+		case KEY_UP:
+			if (!operators[0](game_info))
+				lost = true;
+			break;
+		case KEY_LEFT:
+			if (!operators[1](game_info))
+				lost = true;
+			break;
+		case KEY_RIGHT:
+			if (!operators[2](game_info))
+				lost = true;
+			break;
+		case KEY_DOWN:
+			if (!operators[3](game_info))
+				lost = true;
+			break;
+		default:
+			break;
 		}
-
-		window.clear(sf::Color::Black);
-
-		window.draw(rectangle);
-
-		window.display();
 	}
+
+	if (lost)
+	{
+		cout << "\n\nOoops! You lost!\n\n\n";
+	}
+	else
+	{
+		cout << "\n\nCongratulation! You won!\n\n\n";
+	}
+
+	return;
 }
 
 void solve()
@@ -336,20 +390,33 @@ void menu()
 			 << " | | \\ \\ (_) | | | | |_) | | (_) | (__|   <  \n"
 			 << " |_|  \\_\\___/|_|_| |____/|_|\\___/ \\___|_|\\_\\ \n";
 
-		cout << "\n\n\n\n1. Solve\n0. Exit\n\n\n";
+		cout << "\n1. Play.\n2. Solve\n0. Exit\n\n\n";
 
-		temp = getchar();
+		temp = getch();
 
-		if(temp == '1')
+		if (temp == '1')
+			play();
+		else if (temp == '2')
 			solve();
 	}
 }
 
 int main()
 {
-	//gui();
-	
-	menu();
+	cout << "Enter your preference:\n1. Graphics\n2. Text\n";
+
+	int input;
+	cin >> input;
+
+	if (input == 1)
+	{
+		//gui();
+		cout << "Graphics" << endl;
+	}
+	else if (input == 2)
+		menu();
+	else
+		cout << "Go home you're drunk!\n";
 
 	return 0;
 }
