@@ -5,9 +5,8 @@
 #include <string>
 #include <conio.h>
 
-// #include <SFML/Graphics.hpp>
-
 #include "operators.h"
+#include "algorithms.h"
 
 #define KEY_UP 72
 #define KEY_DOWN 80
@@ -17,20 +16,26 @@
 using namespace std::chrono;
 
 int nodes = 0;
-vector<vector<char>> puzzle;
 
-// {'g', 'g', 'g', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-// {'g', '|', 'g', 'g', 'g', 'g', ' ', ' ', ' ', ' '},
-// {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', ' '},
-// {' ', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g'},
-// {' ', ' ', ' ', ' ', ' ', 'g', 'g', '_', 'g', 'g'},
-// {' ', ' ', ' ', ' ', ' ', ' ', 'g', 'g', 'g', ' '};
-
-set<Position> possible;
 Position goal;
+Position expandCircle;
+Position expandCross;
+vector<vector<char>> puzzle;
+set<Position> possible;
+set<Position> expandableCircle;
+set<Position> expandableCross;
+
+bool checkDone(const shared_ptr<State> &state)
+{
+	return state->pos1 == goal && state->pos2.i == -1 && state->pos2.j == -1;
+}
 
 shared_ptr<State> analyzepuzzle()
 {
+	possible.clear();
+	expandableCircle.clear();
+	expandableCross.clear();
+
 	shared_ptr<State> start(new State);
 	start->parent = nullptr;
 	Position pos;
@@ -76,6 +81,30 @@ shared_ptr<State> analyzepuzzle()
 				pos.i = i;
 				pos.j = j;
 				possible.insert(pos);
+				break;
+			case 'X':
+				expandCross.i = i;
+				expandCross.j = j;
+				pos.i = i;
+				pos.j = j;
+				possible.insert(pos);
+				break;
+			case 'x':
+				pos.i = i;
+				pos.j = j;
+				expandableCross.insert(pos);
+				break;
+			case 'C':
+				expandCircle.i = i;
+				expandCircle.j = j;
+				pos.i = i;
+				pos.j = j;
+				possible.insert(pos);
+				break;
+			case 'c':
+				pos.i = i;
+				pos.j = j;
+				expandableCircle.insert(pos);
 				break;
 			default:
 				break;
@@ -133,6 +162,12 @@ void displaypuzzle(const shared_ptr<State> &state)
 					else if (puzzle[i / 2][j / 2] == '|')
 						cout << " g ";
 
+					else if (puzzle[i / 2][j / 2] == 'x' && !state->expandedCross)
+						cout << "   ";
+
+					else if (puzzle[i / 2][j / 2] == 'c' && !state->expandedCircle)
+						cout << "   ";
+
 					else
 						cout << ' ' << puzzle[i / 2][j / 2] << ' ';
 				}
@@ -151,88 +186,6 @@ void displaypuzzle(const shared_ptr<State> &state)
 			cout << " ";
 	}
 	cout << endl;
-}
-
-bool checkDone(const shared_ptr<State> &state)
-{
-	return state->pos1 == goal && state->pos2.i == -1 && state->pos2.j == -1;
-}
-
-bool findDuplicate(shared_ptr<State> parent, shared_ptr<State> child)
-{
-	while (parent != nullptr)
-	{
-		if (parent == child)
-			return true;
-
-		parent = parent->parent;
-	}
-
-	return false;
-}
-
-shared_ptr<State> breadthFirstSearch(vector<shared_ptr<State>> &states)
-{
-	shared_ptr<State> res;
-
-	while (states.size() != 0)
-	{
-		if (checkDone(states[0]))
-		{
-			res = states[0];
-			break;
-		}
-
-		for (int i = 0; i < operators.size(); ++i)
-		{
-			shared_ptr<State> new_state(new State);
-			new_state->pos1 = states[0]->pos1;
-			new_state->pos2 = states[0]->pos2;
-			new_state->parent = states[0];
-
-			if (operators[i](new_state) && !findDuplicate(states[0], new_state))
-			{
-				states.push_back(new_state);
-				++nodes;
-			}
-		}
-
-		states.erase(states.begin());
-	}
-
-	return res;
-}
-
-shared_ptr<State> depthFirstSearch(vector<shared_ptr<State>> &states)
-{
-	shared_ptr<State> res;
-
-	while (states.size() != 0)
-	{
-		if (checkDone(states[0]))
-		{
-			res = states[0];
-			break;
-		}
-
-		for (int i = 0; i < operators.size(); ++i)
-		{
-			shared_ptr<State> new_state(new State);
-			new_state->pos1 = states[0]->pos1;
-			new_state->pos2 = states[0]->pos2;
-			new_state->parent = states[0];
-
-			if (operators[i](new_state) && !findDuplicate(states[0], new_state))
-			{
-				states.insert(states.begin() + 1, new_state);
-				++nodes;
-			}
-		}
-
-		states.erase(states.begin());
-	}
-
-	return res;
 }
 
 void displaySolution(shared_ptr<State> state)
@@ -256,21 +209,9 @@ void displaySolution(shared_ptr<State> state)
 	}
 }
 
-void solve(int level)
+void solve()
 {
-	possible.clear();
 	nodes = 0;
-
-	ifstream mapFile("levels/" + to_string(level) + ".txt");
-
-	puzzle.clear();
-	string temp;
-
-	while (getline(mapFile, temp))
-	{
-		vector<char> line(temp.begin(), temp.end());
-		puzzle.push_back(line);
-	}
 
 	shared_ptr<State> start = analyzepuzzle();
 
@@ -280,7 +221,7 @@ void solve(int level)
 	++nodes;
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	shared_ptr<State> end = breadthFirstSearch(states);
+	shared_ptr<State> end = depthFirstSearch(states);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	auto duration = duration_cast<microseconds>(t2 - t1).count();
@@ -288,63 +229,22 @@ void solve(int level)
 	cout << "Duration: " << (float)duration / 1000000 << " seconds.\n";
 	cout << "Nodes: " << nodes << ".\n";
 
-	cout << end->pos1.i << endl;
-
 	displaySolution(end);
 }
 
-// void gui()
-// {
-// 	sf::RenderWindow window(sf::VideoMode(800, 600), "Roll Block", sf::Style::Default);
-// 	sf::Image img;
+void readLevel(char *level)
+{
+	ifstream mapFile("levels/" + string(level) + ".txt");
 
-// 	img.loadFromFile("roll_block.png");
-// 	window.setIcon(img.getSize().x, img.getSize().y, img.getPixelsPtr());
+	puzzle.clear();
+	string temp;
 
-// 	sf::RectangleShape rectangle(sf::Vector2f(50.f, 50.f));
-
-// 	while (window.isOpen())
-// 	{
-// 		sf::Event event;
-// 		while (window.pollEvent(event))
-// 		{
-// 			switch (event.type)
-// 			{
-// 			case sf::Event::Closed:
-// 				window.close();
-// 				break;
-
-// 			case sf::Event::KeyReleased:
-// 				if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)
-// 				{
-// 					rectangle.move(sf::Vector2f(0.f, -5.f));
-// 				}
-// 				if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left)
-// 				{
-// 					rectangle.move(sf::Vector2f(-5.f, 0.f));
-// 				}
-// 				if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right)
-// 				{
-// 					rectangle.move(sf::Vector2f(5.f, 0.f));
-// 				}
-// 				if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down)
-// 				{
-// 					rectangle.move(sf::Vector2f(0.f, 5.f));
-// 				}
-// 				break;
-
-// 			default:
-// 				break;
-// 			}
-// 		}
-
-// 		window.clear(sf::Color::Black);
-
-// 		window.draw(rectangle);
-
-// 		window.display();
-// 	}
-// }
+	while (getline(mapFile, temp))
+	{
+		vector<char> line(temp.begin(), temp.end());
+		puzzle.push_back(line);
+	}
+}
 
 void play()
 {
@@ -394,7 +294,7 @@ void play()
 	return;
 }
 
-void menu(int level)
+void menu()
 {
 	char temp = '\n';
 	while (temp != '0')
@@ -406,7 +306,7 @@ void menu(int level)
 			 << " | | \\ \\ (_) | | | | |_) | | (_) | (__|   <  \n"
 			 << " |_|  \\_\\___/|_|_| |____/|_|\\___/ \\___|_|\\_\\ \n";
 
-		cout << "\n1. Play.\n2. Solve\n0. Exit\n\n\n";
+		cout << "\n1. Play.\n2. Solve.\n0. Exit.\n\n\n";
 
 		temp = getch();
 
@@ -414,24 +314,24 @@ void menu(int level)
 			play();
 
 		else if (temp == '2')
-			solve(level);
+			solve();
 	}
 }
 
 int main(int argc, char **argv)
 {
+	readLevel(argv[1]);
 	cout << "Enter your preference:\n1. Graphics\n2. Text\n";
 
-	int input;
-	cin >> input;
+	char input = getch();
 
-	if (input == 1)
+	if (input == '1')
 	{
 		//gui();
 		cout << "Graphics" << endl;
 	}
-	else if (input == 2)
-		menu(atoi(argv[1]));
+	else if (input == '2')
+		menu();
 	else
 		cout << "Go home you're drunk!\n";
 

@@ -1,5 +1,6 @@
-ggggggggggg
-ggggggggggg
-gg|ggggg_gg
-ggggggggggg
-ggggggggggg
+ggg       
+g|gggg    
+ggggggggg 
+ ggggggggg
+     gg_gg
+      ggg 

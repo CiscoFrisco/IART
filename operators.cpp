@@ -1,5 +1,10 @@
 #include "operators.h"
 
+bool find(const shared_ptr<State> &state, const Position &pos)
+{
+	return possible.find(pos) != possible.end() || (state->expandedCircle && expandableCircle.find(pos) != expandableCircle.end()) || (state->expandedCross && expandableCross.find(pos) != expandableCross.end());
+}
+
 bool up(shared_ptr<State> &state)
 {
 	if (state->pos2.i == -1 && state->pos2.j == -1)
@@ -13,8 +18,11 @@ bool up(shared_ptr<State> &state)
 		pos2.i = state->pos1.i - 1;
 		pos2.j = state->pos1.j;
 
-		if (possible.find(pos1) != possible.end() && possible.find(pos2) != possible.end())
+		if (find(state, pos1) && find(state, pos2))
 		{
+			if (pos1 == expandCircle || pos2 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -34,8 +42,11 @@ bool up(shared_ptr<State> &state)
 		pos2.i = state->pos2.i - 1;
 		pos2.j = state->pos2.j;
 
-		if (possible.find(pos1) != possible.end() && possible.find(pos2) != possible.end())
+		if (find(state, pos1) && find(state, pos2))
 		{
+			if (pos1 == expandCircle || pos2 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -55,8 +66,14 @@ bool up(shared_ptr<State> &state)
 		pos2.i = -1;
 		pos2.j = -1;
 
-		if (possible.find(pos1) != possible.end())
+		if (find(state, pos1))
 		{
+			if (pos1 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
+			if (pos1 == expandCross)
+				state->expandedCross = !state->expandedCross;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -81,8 +98,11 @@ bool left(shared_ptr<State> &state)
 		pos2.i = state->pos1.i;
 		pos2.j = state->pos1.j - 1;
 
-		if (possible.find(pos1) != possible.end() && possible.find(pos2) != possible.end())
+		if (find(state, pos1) && find(state, pos2))
 		{
+			if (pos1 == expandCircle || pos2 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -102,8 +122,14 @@ bool left(shared_ptr<State> &state)
 		pos2.i = -1;
 		pos2.j = -1;
 
-		if (possible.find(pos1) != possible.end())
+		if (find(state, pos1))
 		{
+			if (pos1 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
+			if (pos1 == expandCross)
+				state->expandedCross = !state->expandedCross;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -123,8 +149,11 @@ bool left(shared_ptr<State> &state)
 		pos2.i = state->pos2.i;
 		pos2.j = state->pos2.j - 1;
 
-		if (possible.find(pos1) != possible.end() && possible.find(pos2) != possible.end())
+		if (find(state, pos1) && find(state, pos2))
 		{
+			if (pos1 == expandCircle || pos2 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -149,8 +178,11 @@ bool right(shared_ptr<State> &state)
 		pos2.i = state->pos1.i;
 		pos2.j = state->pos1.j + 2;
 
-		if (possible.find(pos1) != possible.end() && possible.find(pos2) != possible.end())
+		if (find(state, pos1) && find(state, pos2))
 		{
+			if (pos1 == expandCircle || pos2 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -170,8 +202,14 @@ bool right(shared_ptr<State> &state)
 		pos2.i = -1;
 		pos2.j = -1;
 
-		if (possible.find(pos1) != possible.end())
+		if (find(state, pos1))
 		{
+			if (pos1 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
+			if (pos1 == expandCross)
+				state->expandedCross = !state->expandedCross;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -191,8 +229,11 @@ bool right(shared_ptr<State> &state)
 		pos2.i = state->pos2.i;
 		pos2.j = state->pos2.j + 1;
 
-		if (possible.find(pos1) != possible.end() && possible.find(pos2) != possible.end())
+		if (find(state, pos1) && find(state, pos2))
 		{
+			if (pos1 == expandCircle || pos2 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -217,8 +258,11 @@ bool down(shared_ptr<State> &state)
 		pos2.i = state->pos1.i + 2;
 		pos2.j = state->pos1.j;
 
-		if (possible.find(pos1) != possible.end() && possible.find(pos2) != possible.end())
+		if (find(state, pos1) && find(state, pos2))
 		{
+			if (pos1 == expandCircle || pos2 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -238,8 +282,11 @@ bool down(shared_ptr<State> &state)
 		pos2.i = state->pos2.i + 1;
 		pos2.j = state->pos2.j;
 
-		if (possible.find(pos1) != possible.end() && possible.find(pos2) != possible.end())
+		if (find(state, pos1) && find(state, pos2))
 		{
+			if (pos1 == expandCircle || pos2 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
@@ -259,8 +306,14 @@ bool down(shared_ptr<State> &state)
 		pos2.i = -1;
 		pos2.j = -1;
 
-		if (possible.find(pos1) != possible.end())
+		if (find(state, pos1))
 		{
+			if (pos1 == expandCircle)
+				state->expandedCircle = !state->expandedCircle;
+
+			if (pos1 == expandCross)
+				state->expandedCross = !state->expandedCross;
+
 			state->pos1 = pos1;
 			state->pos2 = pos2;
 			return true;
