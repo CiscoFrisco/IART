@@ -1,21 +1,22 @@
 #include <iostream>
 #include <stack>
 #include <chrono>
-
-#include <SFML/Graphics.hpp>
+#include <fstream>
+#include <string>
 
 #include "operators.h"
 
 using namespace std::chrono;
 
 int nodes = 0;
-vector<vector<char>> puzzle = {
-	{'g', 'g', 'g', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-	{'g', '|', 'g', 'g', 'g', 'g', ' ', ' ', ' ', ' '},
-	{'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', ' '},
-	{' ', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g'},
-	{' ', ' ', ' ', ' ', ' ', 'g', 'g', '_', 'g', 'g'},
-	{' ', ' ', ' ', ' ', ' ', ' ', 'g', 'g', 'g', ' '}};
+vector<vector<char>> puzzle;
+
+// {'g', 'g', 'g', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+// {'g', '|', 'g', 'g', 'g', 'g', ' ', ' ', ' ', ' '},
+// {'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', ' '},
+// {' ', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g', 'g'},
+// {' ', ' ', ' ', ' ', ' ', 'g', 'g', '_', 'g', 'g'},
+// {' ', ' ', ' ', ' ', ' ', ' ', 'g', 'g', 'g', ' '};
 
 set<Position> possible;
 Position goal;
@@ -247,61 +248,22 @@ void displaySolution(shared_ptr<State> state)
 	}
 }
 
-void gui()
+void solve(int level)
 {
-	sf::RenderWindow window(sf::VideoMode(800, 600), "Roll Block", sf::Style::Default);
-	sf::Image img;
+	possible.clear();
+	nodes = 0;
 
-	img.loadFromFile("roll_block.png");
-	window.setIcon(img.getSize().x, img.getSize().y, img.getPixelsPtr());
+	ifstream mapFile("levels/" + to_string(level) + ".txt");
 
-	sf::RectangleShape rectangle(sf::Vector2f(50.f, 50.f));
+	puzzle.clear();
+	string temp;
 
-	while (window.isOpen())
+	while (getline(mapFile,temp))
 	{
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			switch (event.type)
-			{
-			case sf::Event::Closed:
-				window.close();
-				break;
-
-			case sf::Event::KeyReleased:
-				if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)
-				{
-					rectangle.move(sf::Vector2f(0.f, -5.f));
-				}
-				if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left)
-				{
-					rectangle.move(sf::Vector2f(-5.f, 0.f));
-				}
-				if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right)
-				{
-					rectangle.move(sf::Vector2f(5.f, 0.f));
-				}
-				if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down)
-				{
-					rectangle.move(sf::Vector2f(0.f, 5.f));
-				}
-				break;
-
-			default:
-				break;
-			}
-		}
-
-		window.clear(sf::Color::Black);
-
-		window.draw(rectangle);
-
-		window.display();
+		vector<char> line(temp.begin(),temp.end());
+		puzzle.push_back(line);
 	}
-}
 
-void solve()
-{
 	shared_ptr<State> start = analyzepuzzle();
 
 	vector<shared_ptr<State>> states;
@@ -310,7 +272,7 @@ void solve()
 	++nodes;
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	shared_ptr<State> end = depthFirstSearch(states);
+	shared_ptr<State> end = breadthFirstSearch(states);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	auto duration = duration_cast<microseconds>(t2 - t1).count();
@@ -318,13 +280,12 @@ void solve()
 	cout << "Duration: " << (float)duration / 1000000 << " seconds.\n";
 	cout << "Nodes: " << nodes << ".\n";
 
-	displaySolution(end);
+	cout << end->pos1.i << endl;
 
-	possible.clear();
-	nodes = 0;
+	displaySolution(end);
 }
 
-void menu()
+void menu(int level)
 {
 	char temp = '\n';
 	while (temp != '0')
@@ -340,16 +301,17 @@ void menu()
 
 		temp = getchar();
 
-		if(temp == '1')
-			solve();
+		if (temp == '1')
+			solve(level);
 	}
 }
 
-int main()
+int main(int argc, char **argv)
 {
 	//gui();
-	
-	menu();
+	//menu();
+
+	solve(atoi(argv[1]));
 
 	return 0;
 }
