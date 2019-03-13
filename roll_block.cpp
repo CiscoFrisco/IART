@@ -3,8 +3,16 @@
 #include <chrono>
 #include <fstream>
 #include <string>
+#include <conio.h>
+
+// #include <SFML/Graphics.hpp>
 
 #include "operators.h"
+
+#define KEY_UP 72
+#define KEY_DOWN 80
+#define KEY_LEFT 75
+#define KEY_RIGHT 77
 
 using namespace std::chrono;
 
@@ -258,9 +266,9 @@ void solve(int level)
 	puzzle.clear();
 	string temp;
 
-	while (getline(mapFile,temp))
+	while (getline(mapFile, temp))
 	{
-		vector<char> line(temp.begin(),temp.end());
+		vector<char> line(temp.begin(), temp.end());
 		puzzle.push_back(line);
 	}
 
@@ -285,6 +293,107 @@ void solve(int level)
 	displaySolution(end);
 }
 
+// void gui()
+// {
+// 	sf::RenderWindow window(sf::VideoMode(800, 600), "Roll Block", sf::Style::Default);
+// 	sf::Image img;
+
+// 	img.loadFromFile("roll_block.png");
+// 	window.setIcon(img.getSize().x, img.getSize().y, img.getPixelsPtr());
+
+// 	sf::RectangleShape rectangle(sf::Vector2f(50.f, 50.f));
+
+// 	while (window.isOpen())
+// 	{
+// 		sf::Event event;
+// 		while (window.pollEvent(event))
+// 		{
+// 			switch (event.type)
+// 			{
+// 			case sf::Event::Closed:
+// 				window.close();
+// 				break;
+
+// 			case sf::Event::KeyReleased:
+// 				if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)
+// 				{
+// 					rectangle.move(sf::Vector2f(0.f, -5.f));
+// 				}
+// 				if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left)
+// 				{
+// 					rectangle.move(sf::Vector2f(-5.f, 0.f));
+// 				}
+// 				if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right)
+// 				{
+// 					rectangle.move(sf::Vector2f(5.f, 0.f));
+// 				}
+// 				if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down)
+// 				{
+// 					rectangle.move(sf::Vector2f(0.f, 5.f));
+// 				}
+// 				break;
+
+// 			default:
+// 				break;
+// 			}
+// 		}
+
+// 		window.clear(sf::Color::Black);
+
+// 		window.draw(rectangle);
+
+// 		window.display();
+// 	}
+// }
+
+void play()
+{
+	shared_ptr<State> game_info = analyzepuzzle();
+	bool lost = false;
+	char c;
+
+	while (!lost)
+	{
+		displaypuzzle(game_info);
+
+		if (checkDone(game_info))
+			break;
+
+		switch ((c = getch()))
+		{
+		case KEY_UP:
+			if (!operators[0](game_info))
+				lost = true;
+			break;
+		case KEY_LEFT:
+			if (!operators[1](game_info))
+				lost = true;
+			break;
+		case KEY_RIGHT:
+			if (!operators[2](game_info))
+				lost = true;
+			break;
+		case KEY_DOWN:
+			if (!operators[3](game_info))
+				lost = true;
+			break;
+		default:
+			break;
+		}
+	}
+
+	if (lost)
+	{
+		cout << "\n\nOoops! You lost!\n\n\n";
+	}
+	else
+	{
+		cout << "\n\nCongratulation! You won!\n\n\n";
+	}
+
+	return;
+}
+
 void menu(int level)
 {
 	char temp = '\n';
@@ -297,21 +406,34 @@ void menu(int level)
 			 << " | | \\ \\ (_) | | | | |_) | | (_) | (__|   <  \n"
 			 << " |_|  \\_\\___/|_|_| |____/|_|\\___/ \\___|_|\\_\\ \n";
 
-		cout << "\n\n\n\n1. Solve\n0. Exit\n\n\n";
+		cout << "\n1. Play.\n2. Solve\n0. Exit\n\n\n";
 
-		temp = getchar();
+		temp = getch();
 
 		if (temp == '1')
+			play();
+
+		else if (temp == '2')
 			solve(level);
 	}
 }
 
 int main(int argc, char **argv)
 {
-	//gui();
-	//menu();
+	cout << "Enter your preference:\n1. Graphics\n2. Text\n";
 
-	solve(atoi(argv[1]));
+	int input;
+	cin >> input;
+
+	if (input == 1)
+	{
+		//gui();
+		cout << "Graphics" << endl;
+	}
+	else if (input == 2)
+		menu(atoi(argv[1]));
+	else
+		cout << "Go home you're drunk!\n";
 
 	return 0;
 }
