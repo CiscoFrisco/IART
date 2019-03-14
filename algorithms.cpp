@@ -1,9 +1,12 @@
 #include "algorithms.h"
 
+#include <queue>
+#include <stack>
+
 bool findDuplicate(shared_ptr<State> parent, shared_ptr<State> child)
 {
 	while (parent != nullptr)
-	{
+	{		
 		if (parent == child)
 			return true;
 
@@ -13,63 +16,114 @@ bool findDuplicate(shared_ptr<State> parent, shared_ptr<State> child)
 	return false;
 }
 
-shared_ptr<State> breadthFirstSearch(vector<shared_ptr<State>> &states)
+shared_ptr<State> breadthFirstSearch(shared_ptr<State> &start)
 {
+	queue<shared_ptr<State>> states;
+
+	states.push(start);
+	++nodes;
+
 	shared_ptr<State> res;
 
 	while (states.size() != 0)
 	{
-		if (checkDone(states[0]))
+		shared_ptr<State> actual = states.front();
+		states.pop();
+
+		if (checkDone(actual))
 		{
-			res = states[0];
+			res = actual;
 			break;
 		}
 
 		for (int i = 0; i < operators.size(); ++i)
 		{
 			shared_ptr<State> new_state(new State);
-			states[0]->clone(*new_state);
-			new_state->parent = states[0];
+			actual->clone(*new_state);
+			new_state->parent = actual;
 
-			if (operators[i](new_state) && !findDuplicate(states[0], new_state))
+			if (operators[i](new_state) && !findDuplicate(actual, new_state))
 			{
-				states.push_back(new_state);
+				states.push(new_state);
 				++nodes;
 			}
 		}
-
-		states.erase(states.begin());
 	}
 
 	return res;
 }
 
-shared_ptr<State> depthFirstSearch(vector<shared_ptr<State>> &states)
+shared_ptr<State> depthFirstSearch(shared_ptr<State> &start)
 {
+	stack<shared_ptr<State>> states;
+
+	states.push(start);
+	++nodes;
+
 	shared_ptr<State> res;
 
 	while (states.size() != 0)
 	{
-		if (checkDone(states[0]))
+		shared_ptr<State> actual = states.top();
+		states.pop();
+		
+		if (checkDone(actual))
 		{
-			res = states[0];
+			res = actual;
 			break;
 		}
 
 		for (int i = 0; i < operators.size(); ++i)
 		{
 			shared_ptr<State> new_state(new State);
-			states[0]->clone(*new_state);
-			new_state->parent = states[0];
+			actual->clone(*new_state);
+			new_state->parent = actual;
 
-			if (operators[i](new_state) && !findDuplicate(states[0], new_state))
+			if (operators[i](new_state) && !findDuplicate(actual, new_state))
 			{
-				states.insert(states.begin() + 1, new_state);
+				states.push(new_state);
 				++nodes;
 			}
 		}
+	}
 
-		states.erase(states.begin());
+	return res;
+}
+
+shared_ptr<State> greedySearch(shared_ptr<State> &start)
+{
+	priority_queue<shared_ptr<State>> states;
+
+	start->h();
+	states.push(start);
+	++nodes;
+
+	shared_ptr<State> res;
+
+	while (states.size() != 0)
+	{
+		shared_ptr<State> actual = states.top();
+		states.pop();
+		
+		if (checkDone(actual))
+		{
+			res = actual;
+			break;
+		}
+
+		for (int i = 0; i < operators.size(); ++i)
+		{
+			shared_ptr<State> new_state(new State);
+			actual->clone(*new_state);
+			new_state->parent = actual;
+
+			if (operators[i](new_state) && !findDuplicate(actual, new_state))
+			{
+				start->h();
+				states.push(new_state);
+				++nodes;
+			}
+		}
 	}
 
 	return res;

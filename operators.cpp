@@ -338,4 +338,9 @@ bool operator<(const shared_ptr<State> &lhs, const shared_ptr<State> &rhs)
 	return (*lhs) < (*rhs);
 }
 
+void State::h()
+{
+	heuristic = abs(pos1.i - goal.i) + abs(pos1.j - pos2.i);
+}
+
 vector<Operators> operators = {up, left, right, down};

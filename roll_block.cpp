@@ -209,19 +209,22 @@ void displaySolution(shared_ptr<State> state)
 	}
 }
 
-void solve()
+void solve(char mode)
 {
 	nodes = 0;
-
 	shared_ptr<State> start = analyzepuzzle();
-
-	vector<shared_ptr<State>> states;
-
-	states.push_back(start);
-	++nodes;
+	shared_ptr<State> end;
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	shared_ptr<State> end = depthFirstSearch(states);
+
+	if (mode == '2')
+		end = breadthFirstSearch(start);
+
+	else if(mode == '3')
+		end = depthFirstSearch(start);
+
+	else end = greedySearch(start);
+
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	auto duration = duration_cast<microseconds>(t2 - t1).count();
@@ -306,15 +309,15 @@ void menu()
 			 << " | | \\ \\ (_) | | | | |_) | | (_) | (__|   <  \n"
 			 << " |_|  \\_\\___/|_|_| |____/|_|\\___/ \\___|_|\\_\\ \n";
 
-		cout << "\n1. Play.\n2. Solve.\n0. Exit.\n\n\n";
+		cout << "\n1. Play.\n2. Breadth-First.\n3. Depth-First.\n4. Greedy.\n0. Exit.\n\n\n";
 
 		temp = getch();
 
 		if (temp == '1')
 			play();
 
-		else if (temp == '2')
-			solve();
+		else if (temp == '2' || temp == '3' || temp == '4')
+			solve(temp);
 	}
 }
 

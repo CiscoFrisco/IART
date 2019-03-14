@@ -5,6 +5,8 @@
 #include <vector>
 #include <set>
 
+#define INF 32767
+
 using namespace std;
 
 struct Position
@@ -36,6 +38,7 @@ struct State
 	bool expandedCircle = false;
 	bool expandedCross = false;
 	shared_ptr<State> parent;
+	int heuristic = INF;
 
 	bool operator==(const State &other) const
 	{
@@ -44,6 +47,12 @@ struct State
 
 	bool operator<(const State &other) const
 	{
+		if (heuristic < other.heuristic)
+			return true;
+
+		if (other.heuristic < heuristic)
+			return true;
+
 		if (expandedCross && !other.expandedCross)
 			return true;
 
@@ -72,7 +81,10 @@ struct State
 		new_state.pos2 = pos2;
 		new_state.expandedCircle = expandedCircle;
 		new_state.expandedCross = expandedCross;
+		new_state.heuristic = heuristic;
 	}
+
+	void h();
 };
 
 typedef bool (*Operators)(shared_ptr<State> &state);
