@@ -1,6 +1,6 @@
 |ggg    ggg    
-g gg    gggg   
-g gg gggg _g   
+g gg    ggg_   
+g gg gggg gg   
 ggg gg     g   
 gg  gg     gg  
 gggggg     gg  

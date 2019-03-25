@@ -9,6 +9,9 @@ bool findDuplicate(shared_ptr<State> parent, shared_ptr<State> child);
 shared_ptr<State> breadthFirstSearch(shared_ptr<State> &start);
 shared_ptr<State> depthFirstSearch(shared_ptr<State> &start);
 shared_ptr<State> greedySearch(shared_ptr<State> &start);
+shared_ptr<State> aStarSearch(shared_ptr<State> &start);
+shared_ptr<State> uniformCostSearch(shared_ptr<State> &start);
+shared_ptr<State> iterativeDeepeningSearch(shared_ptr<State> &start);
 
 extern int nodes;
 extern Position goal;

@@ -110,6 +110,8 @@ shared_ptr<State> analyzepuzzle()
 				break;
 			}
 
+	start->cost = 0;
+
 	return start;
 }
 
@@ -220,10 +222,20 @@ void solve(char mode)
 	if (mode == '2')
 		end = breadthFirstSearch(start);
 
-	else if(mode == '3')
+	else if (mode == '3')
 		end = depthFirstSearch(start);
 
-	else end = greedySearch(start);
+	else if (mode == '4')
+		end = greedySearch(start);
+
+	else if (mode == '5')
+		end = aStarSearch(start);
+
+	else if (mode == '6')
+		end = uniformCostSearch(start);
+
+	else if (mode == '7')
+		end = iterativeDeepeningSearch(start);
 
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
@@ -231,6 +243,7 @@ void solve(char mode)
 
 	cout << "Duration: " << (float)duration / 1000000 << " seconds.\n";
 	cout << "Nodes: " << nodes << ".\n";
+	cout << "Cost: " << end->cost << ".\n";
 
 	displaySolution(end);
 }
@@ -309,34 +322,29 @@ void menu()
 			 << " | | \\ \\ (_) | | | | |_) | | (_) | (__|   <  \n"
 			 << " |_|  \\_\\___/|_|_| |____/|_|\\___/ \\___|_|\\_\\ \n";
 
-		cout << "\n1. Play.\n2. Breadth-First.\n3. Depth-First.\n4. Greedy.\n0. Exit.\n\n\n";
+		cout << "\n1. Play.\n2. Breadth-First.\n3. Depth-First.\n4. Greedy.\n5. A*.\n6. Uniform Cost.\n7. Iterative Deepening.\n0. Exit.\n\n\n";
 
 		temp = getch();
 
 		if (temp == '1')
 			play();
 
-		else if (temp == '2' || temp == '3' || temp == '4')
+		else if (temp == '2' || temp == '3' || temp == '4' || temp == '5' || temp == '6' || temp == '7')
 			solve(temp);
 	}
 }
 
 int main(int argc, char **argv)
 {
-	readLevel(argv[1]);
-	cout << "Enter your preference:\n1. Graphics\n2. Text\n";
-
-	char input = getch();
-
-	if (input == '1')
+	if (argc != 2)
 	{
-		//gui();
-		cout << "Graphics" << endl;
+		cout << "Usage: roll_block.exe <map_level>" << endl;
+		exit(-1);
 	}
-	else if (input == '2')
-		menu();
-	else
-		cout << "Go home you're drunk!\n";
+
+	readLevel(argv[1]);
+
+	menu();
 
 	return 0;
 }

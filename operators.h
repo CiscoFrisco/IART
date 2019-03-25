@@ -39,6 +39,7 @@ struct State
 	bool expandedCross = false;
 	shared_ptr<State> parent;
 	int heuristic = INF;
+	int cost = 0;
 
 	bool operator==(const State &other) const
 	{
@@ -47,10 +48,10 @@ struct State
 
 	bool operator<(const State &other) const
 	{
-		if (heuristic < other.heuristic)
+		if (heuristic > other.heuristic)
 			return true;
 
-		if (other.heuristic < heuristic)
+		if (other.heuristic > heuristic)
 			return true;
 
 		if (expandedCross && !other.expandedCross)
@@ -85,6 +86,27 @@ struct State
 	}
 
 	void h();
+};
+
+class aStarCompare
+{
+public:
+    bool operator() (shared_ptr<State> lhs, shared_ptr<State> rhs)
+    {
+        int lhsCost = lhs->cost + lhs->heuristic;
+		int rhsCost = rhs->cost + rhs->heuristic;
+
+		return lhsCost > rhsCost;
+    }
+};
+
+class uniformCostCompare
+{
+public:
+    bool operator() (shared_ptr<State> lhs, shared_ptr<State> rhs)
+    {
+		return lhs->cost > rhs->cost;
+    }
 };
 
 typedef bool (*Operators)(shared_ptr<State> &state);
