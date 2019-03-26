@@ -5,9 +5,24 @@ bool find(const shared_ptr<State> &state, const Position &pos)
 	return possible.find(pos) != possible.end() || (state->expandedCircle && expandableCircle.find(pos) != expandableCircle.end()) || (state->expandedCross && expandableCross.find(pos) != expandableCross.end());
 }
 
+bool isStanding(const shared_ptr<State> &state)
+{
+	return state->pos2.i == -1 && state->pos2.j == -1;
+}
+
+bool isVertical(const shared_ptr<State> &state)
+{
+	return state->pos1.j == state->pos2.j;
+}
+
+bool isHorizontal(const shared_ptr<State> &state)
+{
+	return state->pos1.i == state->pos2.i;
+}
+
 bool up(shared_ptr<State> &state)
 {
-	if (state->pos2.i == -1 && state->pos2.j == -1)
+	if (isStanding(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -31,7 +46,7 @@ bool up(shared_ptr<State> &state)
 		return false;
 	}
 
-	if (state->pos1.i == state->pos2.i)
+	if (isHorizontal(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -55,7 +70,7 @@ bool up(shared_ptr<State> &state)
 		return false;
 	}
 
-	if (state->pos1.j == state->pos2.j)
+	if (isVertical(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -87,7 +102,7 @@ bool up(shared_ptr<State> &state)
 
 bool left(shared_ptr<State> &state)
 {
-	if (state->pos2.i == -1 && state->pos2.j == -1)
+	if (isStanding(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -111,7 +126,7 @@ bool left(shared_ptr<State> &state)
 		return false;
 	}
 
-	if (state->pos1.i == state->pos2.i)
+	if (isHorizontal(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -138,7 +153,7 @@ bool left(shared_ptr<State> &state)
 		return false;
 	}
 
-	if (state->pos1.j == state->pos2.j)
+	if (isVertical(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -167,7 +182,7 @@ bool left(shared_ptr<State> &state)
 
 bool right(shared_ptr<State> &state)
 {
-	if (state->pos2.i == -1 && state->pos2.j == -1)
+	if (isStanding(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -191,7 +206,7 @@ bool right(shared_ptr<State> &state)
 		return false;
 	}
 
-	if (state->pos1.i == state->pos2.i)
+	if (isHorizontal(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -218,7 +233,7 @@ bool right(shared_ptr<State> &state)
 		return false;
 	}
 
-	if (state->pos1.j == state->pos2.j)
+	if (isVertical(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -247,7 +262,7 @@ bool right(shared_ptr<State> &state)
 
 bool down(shared_ptr<State> &state)
 {
-	if (state->pos2.i == -1 && state->pos2.j == -1)
+	if (isStanding(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -271,7 +286,7 @@ bool down(shared_ptr<State> &state)
 		return false;
 	}
 
-	if (state->pos1.i == state->pos2.i)
+	if (isHorizontal(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -295,7 +310,7 @@ bool down(shared_ptr<State> &state)
 		return false;
 	}
 
-	if (state->pos1.j == state->pos2.j)
+	if (isVertical(state))
 	{
 		Position pos1;
 		Position pos2;
@@ -338,13 +353,14 @@ bool operator<(const shared_ptr<State> &lhs, const shared_ptr<State> &rhs)
 	return (*lhs) < (*rhs);
 }
 
+//Melhorar
 void State::h()
 {
-	heuristic = abs(pos1.i - goal.i) + abs(pos1.j - goal.j);
+	heuristic = (abs(pos1.i - goal.i) + abs(pos1.j - goal.j)) / 1.5;
 
 	if (pos2.i != -1)
 	{
-		int h1 = abs(pos2.i - goal.i) + abs(pos2.j - goal.j);
+		int h1 = (abs(pos2.i - goal.i) + abs(pos2.j - goal.j)) / 1.5;
 
 		heuristic = (h1 < heuristic ? h1 : heuristic);
 	}

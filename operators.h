@@ -4,8 +4,9 @@
 #include <memory>
 #include <vector>
 #include <set>
+#include <limits>
 
-#define INF 32767
+#define INF numeric_limits<double>::max()
 
 using namespace std;
 
@@ -38,7 +39,7 @@ struct State
 	bool expandedCircle = false;
 	bool expandedCross = false;
 	shared_ptr<State> parent;
-	int heuristic = INF;
+	double heuristic = INF;
 	int cost = 0;
 
 	bool operator==(const State &other) const
