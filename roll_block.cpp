@@ -271,7 +271,9 @@ void readLevel(char *level)
 	{
 		vector<char> line(temp.begin(), temp.end());
 		puzzle.push_back(line);
-	}
+	} 
+
+	mapFile.close();
 }
 
 void play()
