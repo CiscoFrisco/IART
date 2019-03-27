@@ -355,11 +355,11 @@ bool operator<(const shared_ptr<State> &lhs, const shared_ptr<State> &rhs)
 
 double calculateDistance(const State &state, const Position pos)
 {
-	double result = (abs(state.pos1.i - pos.i) + abs(state.pos1.j - pos.j)) / 1.5;
+	double result = (abs(state.pos1.i - pos.i) / 1.5) + (abs(state.pos1.j - pos.j) / 1.5);
 
 	if (state.pos2.i != -1)
 	{
-		double other = (abs(state.pos2.i - pos.i) + abs(state.pos2.j - pos.j)) / 1.5;
+		double other = (abs(state.pos2.i - pos.i) / 1.5) + (abs(state.pos2.j - pos.j) / 1.5);
 
 		return (other < result ? other : result);
 	}
@@ -381,22 +381,22 @@ void State::h()
 			{
 				heuristic = h1;
 
-				heuristic += (abs(expandCross.i - expandCircle.i) + abs(expandCross.j - expandCircle.j)) / 1.5;
-				heuristic += (abs(expandCross.i - goal.i) + abs(expandCross.j - goal.j)) / 1.5;
+				heuristic += (abs(expandCross.i - expandCircle.i) / 1.5) + (abs(expandCross.j - expandCircle.j) / 1.5);
+				heuristic += (abs(expandCross.i - goal.i) / 1.5) + (abs(expandCross.j - goal.j) / 1.5);
 
 				return;
 			}
 
 			heuristic = h2;
-			heuristic += (abs(expandCircle.i - expandCross.i) + abs(expandCircle.j - expandCross.j)) / 1.5;
-			heuristic += (abs(expandCircle.i - goal.i) + abs(expandCircle.j - goal.j)) / 1.5;
+			heuristic += (abs(expandCircle.i - expandCross.i) / 1.5) + (abs(expandCircle.j - expandCross.j) / 1.5);
+			heuristic += (abs(expandCircle.i - goal.i) / 1.5) + (abs(expandCircle.j - goal.j) / 1.5);
 
 			return;
 		}
 
 		heuristic = calculateDistance(*this, expandCircle);
 
-		heuristic += (abs(goal.i - expandCircle.i) + abs(goal.j - expandCircle.j)) / 1.5;
+		heuristic += (abs(goal.i - expandCircle.i) / 1.5) + (abs(goal.j - expandCircle.j) / 1.5);
 
 		return;
 	}
@@ -405,7 +405,7 @@ void State::h()
 	{
 		heuristic = calculateDistance(*this, expandCross);
 
-		heuristic += (abs(goal.i - expandCross.i) + abs(goal.j - expandCross.j)) / 1.5;
+		heuristic += (abs(goal.i - expandCross.i) / 1.5) + (abs(goal.j - expandCross.j) / 1.5);
 
 		return;
 	}
