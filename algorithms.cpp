@@ -23,18 +23,13 @@ shared_ptr<State> breadthFirstSearch(shared_ptr<State> &start)
 	states.push(start);
 	++nodes;
 
-	shared_ptr<State> res;
-
 	while (states.size() != 0)
 	{
 		shared_ptr<State> actual = states.front();
 		states.pop();
 
 		if (checkDone(actual))
-		{
-			res = actual;
-			break;
-		}
+			return actual;
 
 		for (int i = 0; i < operators.size(); ++i)
 		{
@@ -51,7 +46,7 @@ shared_ptr<State> breadthFirstSearch(shared_ptr<State> &start)
 		}
 	}
 
-	return res;
+	return nullptr;
 }
 
 shared_ptr<State> depthFirstSearch(shared_ptr<State> &start)
@@ -61,18 +56,13 @@ shared_ptr<State> depthFirstSearch(shared_ptr<State> &start)
 	states.push(start);
 	++nodes;
 
-	shared_ptr<State> res;
-
 	while (states.size() != 0)
 	{
 		shared_ptr<State> actual = states.top();
 		states.pop();
 
 		if (checkDone(actual))
-		{
-			res = actual;
-			break;
-		}
+			return actual;
 
 		for (int i = 0; i < operators.size(); ++i)
 		{
@@ -89,7 +79,7 @@ shared_ptr<State> depthFirstSearch(shared_ptr<State> &start)
 		}
 	}
 
-	return res;
+	return nullptr;
 }
 
 shared_ptr<State> greedySearch(shared_ptr<State> &start)
@@ -100,18 +90,13 @@ shared_ptr<State> greedySearch(shared_ptr<State> &start)
 	states.push(start);
 	++nodes;
 
-	shared_ptr<State> res;
-
 	while (states.size() != 0)
 	{
 		shared_ptr<State> actual = states.top();
 		states.pop();
 
 		if (checkDone(actual))
-		{
-			res = actual;
-			break;
-		}
+			return actual;
 
 		for (int i = 0; i < operators.size(); ++i)
 		{
@@ -122,14 +107,14 @@ shared_ptr<State> greedySearch(shared_ptr<State> &start)
 
 			if (operators[i](new_state) && !findDuplicate(actual, new_state))
 			{
-				start->h();
+				new_state->h();
 				states.push(new_state);
 				++nodes;
 			}
 		}
 	}
 
-	return res;
+	return nullptr;
 }
 
 shared_ptr<State> aStarSearch(shared_ptr<State> &start)
@@ -140,18 +125,13 @@ shared_ptr<State> aStarSearch(shared_ptr<State> &start)
 	states.push(start);
 	++nodes;
 
-	shared_ptr<State> res;
-
 	while (states.size() != 0)
 	{
 		shared_ptr<State> actual = states.top();
 		states.pop();
 
 		if (checkDone(actual))
-		{
-			res = actual;
-			break;
-		}
+			return actual;
 
 		for (int i = 0; i < operators.size(); ++i)
 		{
@@ -162,14 +142,14 @@ shared_ptr<State> aStarSearch(shared_ptr<State> &start)
 
 			if (operators[i](new_state) && !findDuplicate(actual, new_state))
 			{
-				start->h();
+				new_state->h();
 				states.push(new_state);
 				++nodes;
 			}
 		}
 	}
 
-	return res;
+	return nullptr;
 }
 
 shared_ptr<State> uniformCostSearch(shared_ptr<State> &start)
@@ -180,18 +160,13 @@ shared_ptr<State> uniformCostSearch(shared_ptr<State> &start)
 	states.push(start);
 	++nodes;
 
-	shared_ptr<State> res;
-
 	while (states.size() != 0)
 	{
 		shared_ptr<State> actual = states.top();
 		states.pop();
 
 		if (checkDone(actual))
-		{
-			res = actual;
-			break;
-		}
+			return actual;
 
 		for (int i = 0; i < operators.size(); ++i)
 		{
@@ -208,13 +183,12 @@ shared_ptr<State> uniformCostSearch(shared_ptr<State> &start)
 		}
 	}
 
-	return res;
+	return nullptr;
 }
 
 shared_ptr<State> iterativeDeepeningSearch(shared_ptr<State> &start)
 {
 	stack<shared_ptr<State>> states;
-	shared_ptr<State> res;
 	int depth = 1;
 
 	while (1)
@@ -228,10 +202,7 @@ shared_ptr<State> iterativeDeepeningSearch(shared_ptr<State> &start)
 			states.pop();
 
 			if (checkDone(actual))
-			{
-				res = actual;
-				return res;
-			}
+				return actual;
 
 			if(actual->cost == depth)
 				continue;
@@ -255,5 +226,5 @@ shared_ptr<State> iterativeDeepeningSearch(shared_ptr<State> &start)
 		++depth;
 	}
 
-	return res;
+	return nullptr;
 }

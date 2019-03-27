@@ -370,9 +370,9 @@ double calculateDistance(const State &state, const Position pos)
 //Melhorar
 void State::h()
 {
-	if (expandCircle.i != -1)
+	if (expandCircle.i != -1 && !expandedCircle)
 	{
-		if (expandCross.i != -1)
+		if (expandCross.i != -1 && !expandedCross)
 		{
 			double h1 = calculateDistance(*this, expandCircle);
 			double h2 = calculateDistance(*this, expandCross);
@@ -401,7 +401,7 @@ void State::h()
 		return;
 	}
 
-	if (expandCross.i != -1)
+	if (expandCross.i != -1 && !expandedCross)
 	{
 		heuristic = calculateDistance(*this, expandCross);
 
