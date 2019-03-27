@@ -355,11 +355,11 @@ bool operator<(const shared_ptr<State> &lhs, const shared_ptr<State> &rhs)
 
 double calculateDistance(const State &state, const Position pos)
 {
-	double result = (abs(state.pos1.i - expandCircle.i) + abs(state.pos1.j - expandCircle.j)) / 1.5;
+	double result = (abs(state.pos1.i - pos.i) + abs(state.pos1.j - pos.j)) / 1.5;
 
 	if (state.pos2.i != -1)
 	{
-		double other = (abs(state.pos2.i - expandCircle.i) + abs(state.pos2.j - expandCircle.j)) / 1.5;
+		double other = (abs(state.pos2.i - pos.i) + abs(state.pos2.j - pos.j)) / 1.5;
 
 		return (other < result ? other : result);
 	}

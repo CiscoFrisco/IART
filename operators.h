@@ -94,10 +94,19 @@ class aStarCompare
 public:
     bool operator() (shared_ptr<State> lhs, shared_ptr<State> rhs)
     {
-        int lhsCost = lhs->cost + lhs->heuristic;
-		int rhsCost = rhs->cost + rhs->heuristic;
+      int lhsCost = lhs->cost + lhs->heuristic;
+			int rhsCost = rhs->cost + rhs->heuristic;
 
-		return lhsCost > rhsCost;
+			return lhsCost > rhsCost;
+    }
+};
+
+class greedyCompare
+{
+public:
+    bool operator() (shared_ptr<State> lhs, shared_ptr<State> rhs)
+    {
+		return lhs->heuristic > rhs->heuristic;
     }
 };
 

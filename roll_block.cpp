@@ -219,23 +219,22 @@ void solve(char mode)
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-	if (mode == '2')
-		end = breadthFirstSearch(start);
-
-	else if (mode == '3')
-		end = depthFirstSearch(start);
-
-	else if (mode == '4')
-		end = greedySearch(start);
-
-	else if (mode == '5')
-		end = aStarSearch(start);
-
-	else if (mode == '6')
-		end = uniformCostSearch(start);
-
-	else if (mode == '7')
-		end = iterativeDeepeningSearch(start);
+	switch(mode)
+	{
+		case '2': end = breadthFirstSearch(start);
+		break;
+		case '3': end = depthFirstSearch(start);
+		break;
+		case '4': end = greedySearch(start);
+		break;
+		case '5': end = aStarSearch(start);
+		break;
+		case '6': end = uniformCostSearch(start);
+		break;
+		case '7': end = iterativeDeepeningSearch(start);
+		break;
+		default: return;
+	}
 
 	if(end == nullptr)
 	{
@@ -256,7 +255,14 @@ void solve(char mode)
 
 void readLevel(char *level)
 {
-	ifstream mapFile("levels/" + string(level) + ".txt");
+	ifstream mapFile;
+	mapFile.open("levels/" + string(level) + ".txt");
+	
+	if(!mapFile.is_open())
+	{
+		cout << "Map file not found\n";
+		exit(1);
+	}
 
 	puzzle.clear();
 	string temp;
