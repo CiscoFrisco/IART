@@ -21,12 +21,13 @@ shared_ptr<State> breadthFirstSearch(shared_ptr<State> &start)
 	queue<shared_ptr<State>> states;
 
 	states.push(start);
-	++nodes;
+	++expanded_nodes;
 
 	while (states.size() != 0)
 	{
 		shared_ptr<State> actual = states.front();
 		states.pop();
+		++analyzed_nodes;
 
 		if (checkDone(actual))
 			return actual;
@@ -41,7 +42,7 @@ shared_ptr<State> breadthFirstSearch(shared_ptr<State> &start)
 				new_state->parent = actual;
 				new_state->cost = actual->cost + 1;
 				states.push(new_state);
-				++nodes;
+				++expanded_nodes;
 			}
 		}
 	}
@@ -54,12 +55,13 @@ shared_ptr<State> depthFirstSearch(shared_ptr<State> &start)
 	stack<shared_ptr<State>> states;
 
 	states.push(start);
-	++nodes;
+	++expanded_nodes;
 
 	while (states.size() != 0)
 	{
 		shared_ptr<State> actual = states.top();
 		states.pop();
+		++analyzed_nodes;
 
 		if (checkDone(actual))
 			return actual;
@@ -74,7 +76,7 @@ shared_ptr<State> depthFirstSearch(shared_ptr<State> &start)
 				new_state->parent = actual;
 				new_state->cost = actual->cost + 1;
 				states.push(new_state);
-				++nodes;
+				++expanded_nodes;
 			}
 		}
 	}
@@ -88,12 +90,13 @@ shared_ptr<State> greedySearch(shared_ptr<State> &start)
 
 	start->h();
 	states.push(start);
-	++nodes;
+	++expanded_nodes;
 
 	while (states.size() != 0)
 	{
 		shared_ptr<State> actual = states.top();
 		states.pop();
+		++analyzed_nodes;
 
 		if (checkDone(actual))
 			return actual;
@@ -109,7 +112,7 @@ shared_ptr<State> greedySearch(shared_ptr<State> &start)
 				new_state->cost = actual->cost + 1;
 				new_state->h();
 				states.push(new_state);
-				++nodes;
+				++expanded_nodes;
 			}
 		}
 	}
@@ -123,12 +126,13 @@ shared_ptr<State> aStarSearch(shared_ptr<State> &start)
 
 	start->h();
 	states.push(start);
-	++nodes;
+	++expanded_nodes;
 
 	while (states.size() != 0)
 	{
 		shared_ptr<State> actual = states.top();
 		states.pop();
+		++analyzed_nodes;
 
 		if (checkDone(actual))
 			return actual;
@@ -144,7 +148,7 @@ shared_ptr<State> aStarSearch(shared_ptr<State> &start)
 				new_state->cost = actual->cost + 1;
 				new_state->h();
 				states.push(new_state);
-				++nodes;
+				++expanded_nodes;
 			}
 		}
 	}
@@ -158,12 +162,13 @@ shared_ptr<State> uniformCostSearch(shared_ptr<State> &start)
 
 	start->h();
 	states.push(start);
-	++nodes;
+	++expanded_nodes;
 
 	while (states.size() != 0)
 	{
 		shared_ptr<State> actual = states.top();
 		states.pop();
+		++analyzed_nodes;
 
 		if (checkDone(actual))
 			return actual;
@@ -178,7 +183,7 @@ shared_ptr<State> uniformCostSearch(shared_ptr<State> &start)
 				new_state->parent = actual;
 				new_state->cost = actual->cost + 1;
 				states.push(new_state);
-				++nodes;
+				++expanded_nodes;
 			}
 		}
 	}
@@ -194,12 +199,13 @@ shared_ptr<State> iterativeDeepeningSearch(shared_ptr<State> &start)
 	while (1)
 	{
 		states.push(start);
-		++nodes;
+		++expanded_nodes;
 
 		while (states.size() != 0)
 		{
 			shared_ptr<State> actual = states.top();
 			states.pop();
+			++analyzed_nodes;
 
 			if (checkDone(actual))
 				return actual;
@@ -217,12 +223,13 @@ shared_ptr<State> iterativeDeepeningSearch(shared_ptr<State> &start)
 				if (operators[i](new_state) && !findDuplicate(actual, new_state))
 				{
 					states.push(new_state);
-					++nodes;
+					++expanded_nodes;
 				}
 			}
 		}
 
-		nodes = 0;
+		expanded_nodes = 0;
+		analyzed_nodes = 0;
 		++depth;
 	}
 

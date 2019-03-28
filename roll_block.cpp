@@ -15,7 +15,8 @@
 
 using namespace std::chrono;
 
-int nodes = 0;
+int expanded_nodes = 0;
+int analyzed_nodes = 0;
 
 Position goal;
 Position expandCircle;
@@ -213,7 +214,8 @@ void displaySolution(shared_ptr<State> state)
 
 void solve(char mode)
 {
-	nodes = 0;
+	expanded_nodes = 0;
+	analyzed_nodes = 0;
 	shared_ptr<State> start = analyzepuzzle();
 	shared_ptr<State> end;
 
@@ -247,7 +249,8 @@ void solve(char mode)
 	auto duration = duration_cast<microseconds>(t2 - t1).count();
 
 	cout << "Duration: " << (float)duration / 1000000 << " seconds.\n";
-	cout << "Nodes: " << nodes << ".\n";
+	cout << "Expanded Nodes: " << expanded_nodes << ".\n";
+	cout << "Analyzed Nodes: " << analyzed_nodes << ".\n";
 	cout << "Cost: " << end->cost << ".\n";
 
 	displaySolution(end);

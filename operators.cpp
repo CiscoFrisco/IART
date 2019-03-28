@@ -367,7 +367,6 @@ double calculateDistance(const State &state, const Position pos)
 	return result;
 }
 
-//Melhorar
 void State::h()
 {
 	if (expandCircle.i != -1 && !expandedCircle)

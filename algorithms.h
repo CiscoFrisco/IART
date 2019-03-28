@@ -13,7 +13,8 @@ shared_ptr<State> aStarSearch(shared_ptr<State> &start);
 shared_ptr<State> uniformCostSearch(shared_ptr<State> &start);
 shared_ptr<State> iterativeDeepeningSearch(shared_ptr<State> &start);
 
-extern int nodes;
+extern int expanded_nodes;
+extern int analyzed_nodes;
 extern Position goal;
 
 #endif
