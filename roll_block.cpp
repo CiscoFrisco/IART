@@ -210,6 +210,9 @@ void displaySolution(shared_ptr<State> state)
 		way.pop();
 		getchar();
 	}
+
+	cout << "\n\nCongratulation! The AI won!\n\n\n";
+	getchar();
 }
 
 void solve(char mode)
@@ -241,6 +244,7 @@ void solve(char mode)
 	if(end == nullptr)
 	{
 		cout << "Could not solve puzzle.\n\n\n";
+		getchar();
 		return;
 	}
 
