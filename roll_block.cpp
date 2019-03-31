@@ -12,6 +12,7 @@
 #define KEY_DOWN 80
 #define KEY_LEFT 75
 #define KEY_RIGHT 77
+#define KEY_ESC 27
 
 using namespace std::chrono;
 
@@ -224,24 +225,31 @@ void solve(char mode)
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-	switch(mode)
+	switch (mode)
 	{
-		case '2': end = breadthFirstSearch(start);
+	case '2':
+		end = breadthFirstSearch(start);
 		break;
-		case '3': end = depthFirstSearch(start);
+	case '3':
+		end = depthFirstSearch(start);
 		break;
-		case '4': end = greedySearch(start);
+	case '4':
+		end = greedySearch(start);
 		break;
-		case '5': end = aStarSearch(start);
+	case '5':
+		end = aStarSearch(start);
 		break;
-		case '6': end = uniformCostSearch(start);
+	case '6':
+		end = uniformCostSearch(start);
 		break;
-		case '7': end = iterativeDeepeningSearch(start);
+	case '7':
+		end = iterativeDeepeningSearch(start);
 		break;
-		default: return;
+	default:
+		return;
 	}
 
-	if(end == nullptr)
+	if (end == nullptr)
 	{
 		cout << "Could not solve puzzle.\n\n\n";
 		getchar();
@@ -263,9 +271,18 @@ void solve(char mode)
 void readLevel(char *level)
 {
 	ifstream mapFile;
-	mapFile.open("levels/" + string(level) + ".txt");
-	
-	if(!mapFile.is_open())
+
+	string level_path = string(level);
+
+	if (level_path.find("levels/") == string::npos)
+		level_path = "levels/" + level_path;
+
+	if (level_path.find(".txt") == string::npos)
+		level_path += ".txt";
+
+	mapFile.open(level_path);
+
+	if (!mapFile.is_open())
 	{
 		cout << "Map file not found\n";
 		exit(1);
@@ -278,7 +295,7 @@ void readLevel(char *level)
 	{
 		vector<char> line(temp.begin(), temp.end());
 		puzzle.push_back(line);
-	} 
+	}
 
 	mapFile.close();
 }
@@ -287,34 +304,53 @@ void play()
 {
 	shared_ptr<State> game_info = analyzepuzzle();
 	bool lost = false;
+	bool input = true;
 	char c;
 
 	while (!lost)
 	{
-		displaypuzzle(game_info);
+		if (input)
+		{
+			displaypuzzle(game_info);
+
+			cout << "\n\n WASD or arrow keys to play! ESC to go back to menu\n\n";
+		}
+
+		input = true;
 
 		if (checkDone(game_info))
 			break;
 
 		switch ((c = getch()))
 		{
+		case KEY_ESC:
+			return;
+		case 'W':
+		case 'w':
 		case KEY_UP:
 			if (!operators[0](game_info))
 				lost = true;
 			break;
+		case 'A':
+		case 'a':
 		case KEY_LEFT:
 			if (!operators[1](game_info))
 				lost = true;
 			break;
+		case 'D':
+		case 'd':
 		case KEY_RIGHT:
 			if (!operators[2](game_info))
 				lost = true;
 			break;
+		case 'S':
+		case 's':
 		case KEY_DOWN:
 			if (!operators[3](game_info))
 				lost = true;
 			break;
 		default:
+			input = false;
 			break;
 		}
 	}
@@ -331,19 +367,28 @@ void play()
 	return;
 }
 
+void printMenu()
+{
+	cout << "  _____       _ _   ____  _            _     \n"
+		 << " |  __ \\     | | | |  _ \\| |          | |    \n"
+		 << " | |__) |___ | | | | |_) | | ___   ___| | __ \n"
+		 << " |  _  // _ \\| | | |  _ <| |/ _ \\ / __| |/ / \n"
+		 << " | | \\ \\ (_) | | | | |_) | | (_) | (__|   <  \n"
+		 << " |_|  \\_\\___/|_|_| |____/|_|\\___/ \\___|_|\\_\\ \n";
+
+	cout << "\n1. Play.\n2. Breadth-First.\n3. Depth-First.\n4. Greedy.\n5. A*.\n6. Uniform Cost.\n7. Iterative Deepening.\n0. Exit.\n\n\n";
+}
+
 void menu()
 {
+	bool input = true;
 	char temp = '\n';
 	while (temp != '0')
 	{
-		cout << "  _____       _ _   ____  _            _     \n"
-			 << " |  __ \\     | | | |  _ \\| |          | |    \n"
-			 << " | |__) |___ | | | | |_) | | ___   ___| | __ \n"
-			 << " |  _  // _ \\| | | |  _ <| |/ _ \\ / __| |/ / \n"
-			 << " | | \\ \\ (_) | | | | |_) | | (_) | (__|   <  \n"
-			 << " |_|  \\_\\___/|_|_| |____/|_|\\___/ \\___|_|\\_\\ \n";
+		if (input)
+			printMenu();
 
-		cout << "\n1. Play.\n2. Breadth-First.\n3. Depth-First.\n4. Greedy.\n5. A*.\n6. Uniform Cost.\n7. Iterative Deepening.\n0. Exit.\n\n\n";
+		input = true;
 
 		temp = getch();
 
@@ -352,6 +397,9 @@ void menu()
 
 		else if (temp == '2' || temp == '3' || temp == '4' || temp == '5' || temp == '6' || temp == '7')
 			solve(temp);
+
+		else
+			input = false;
 	}
 }
 
