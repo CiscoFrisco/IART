@@ -27,6 +27,7 @@ set<Position> possible;
 set<Position> expandableCircle;
 set<Position> expandableCross;
 
+/* Checks if a given state is the goal state */
 bool checkDone(const shared_ptr<State> &state)
 {
 	return state->pos1 == goal && state->pos2.i == -1 && state->pos2.j == -1;

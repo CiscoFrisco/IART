@@ -3,6 +3,8 @@
 #include <queue>
 #include <stack>
 
+/* Checks all state antecessors for a duplicate state
+ * Returns true in case any duplicate is found, false otherwise */
 bool findDuplicate(shared_ptr<State> parent, shared_ptr<State> child)
 {
 	while (parent != nullptr)
@@ -16,6 +18,8 @@ bool findDuplicate(shared_ptr<State> parent, shared_ptr<State> child)
 	return false;
 }
 
+/* Breadth First Search Algorithm
+ * Uses a queue to store nodes    */
 shared_ptr<State> breadthFirstSearch(shared_ptr<State> &start)
 {
 	queue<shared_ptr<State>> states;
@@ -50,6 +54,8 @@ shared_ptr<State> breadthFirstSearch(shared_ptr<State> &start)
 	return nullptr;
 }
 
+/* Depth First Search Algorithm
+ * Uses a stack to store nodes    */
 shared_ptr<State> depthFirstSearch(shared_ptr<State> &start)
 {
 	stack<shared_ptr<State>> states;
@@ -84,6 +90,9 @@ shared_ptr<State> depthFirstSearch(shared_ptr<State> &start)
 	return nullptr;
 }
 
+/* Greedy Search Algorithm
+ * Uses a priority queue to store nodes
+ * Priority queue is sorted using state heuristic */
 shared_ptr<State> greedySearch(shared_ptr<State> &start)
 {
 	priority_queue<shared_ptr<State>,vector<shared_ptr<State>>, greedyCompare> states;
@@ -120,6 +129,9 @@ shared_ptr<State> greedySearch(shared_ptr<State> &start)
 	return nullptr;
 }
 
+/* A Star Search Algorithm
+ * Uses a priority queue to store nodes
+ * Priority queue is sorted using state heuristic + state cost */
 shared_ptr<State> aStarSearch(shared_ptr<State> &start)
 {
 	priority_queue<shared_ptr<State>, vector<shared_ptr<State>>, aStarCompare> states;
@@ -156,6 +168,9 @@ shared_ptr<State> aStarSearch(shared_ptr<State> &start)
 	return nullptr;
 }
 
+/* Uniform Cost Search Algorithm
+ * Uses a priority queue to store nodes
+ * Priority queue is sorted using state cost */
 shared_ptr<State> uniformCostSearch(shared_ptr<State> &start)
 {
 	priority_queue<shared_ptr<State>, vector<shared_ptr<State>>, uniformCostCompare> states;
@@ -191,6 +206,9 @@ shared_ptr<State> uniformCostSearch(shared_ptr<State> &start)
 	return nullptr;
 }
 
+/* Iterative Deepening Search Algorithm
+ * Uses a stack to store nodes
+ * Starts with depth 1 which is incremented by 1 until a solution is found */
 shared_ptr<State> iterativeDeepeningSearch(shared_ptr<State> &start)
 {
 	stack<shared_ptr<State>> states;

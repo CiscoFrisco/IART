@@ -1,25 +1,33 @@
 #include "operators.h"
 
+
+/* Finds if it is possible for the block to be in a given position */
 bool find(const shared_ptr<State> &state, const Position &pos)
 {
 	return possible.find(pos) != possible.end() || (state->expandedCircle && expandableCircle.find(pos) != expandableCircle.end()) || (state->expandedCross && expandableCross.find(pos) != expandableCross.end());
 }
 
+/* Checks if the block is standing */
 bool isStanding(const shared_ptr<State> &state)
 {
 	return state->pos2.i == -1 && state->pos2.j == -1;
 }
 
+/* Checks if the block is lying down/up */
 bool isVertical(const shared_ptr<State> &state)
 {
 	return state->pos1.j == state->pos2.j;
 }
 
+/* Checks if the block is lying left/right */
 bool isHorizontal(const shared_ptr<State> &state)
 {
 	return state->pos1.i == state->pos2.i;
 }
 
+/* Up Operator
+ * Checks if it possible to aplly the operator, 
+ * in which case applies it amd returns true, otherwise returns false */
 bool up(shared_ptr<State> &state)
 {
 	if (isStanding(state))
@@ -100,6 +108,9 @@ bool up(shared_ptr<State> &state)
 	return false;
 }
 
+/* Left Operator
+ * Checks if it possible to aplly the operator, 
+ * in which case applies it amd returns true, otherwise returns false */
 bool left(shared_ptr<State> &state)
 {
 	if (isStanding(state))
@@ -180,6 +191,9 @@ bool left(shared_ptr<State> &state)
 	return false;
 }
 
+/* Right Operator
+ * Checks if it possible to aplly the operator, 
+ * in which case applies it amd returns true, otherwise returns false */
 bool right(shared_ptr<State> &state)
 {
 	if (isStanding(state))
@@ -260,6 +274,9 @@ bool right(shared_ptr<State> &state)
 	return false;
 }
 
+/* Down Operator
+ * Checks if it possible to aplly the operator, 
+ * in which case applies it amd returns true, otherwise returns false */
 bool down(shared_ptr<State> &state)
 {
 	if (isStanding(state))
@@ -340,6 +357,7 @@ bool down(shared_ptr<State> &state)
 	return false;
 }
 
+/* Checks if two state pointers are equal by comparing the state they are pointing to */
 bool operator==(const shared_ptr<State> &lhs, const shared_ptr<State> &rhs)
 {
 	if (lhs == nullptr || rhs == nullptr)
@@ -348,6 +366,7 @@ bool operator==(const shared_ptr<State> &lhs, const shared_ptr<State> &rhs)
 	return (*lhs) == (*rhs);
 }
 
+/* Checks the order of two state pointers by comparing the order of the states they are pointing to */
 bool operator<(const shared_ptr<State> &lhs, const shared_ptr<State> &rhs)
 {
 	return (*lhs) < (*rhs);
