@@ -372,6 +372,8 @@ bool operator<(const shared_ptr<State> &lhs, const shared_ptr<State> &rhs)
 	return (*lhs) < (*rhs);
 }
 
+/* Calculates the distance between the block actual position and a certain position,
+   using the block max average velocity (1.5) */
 double calculateDistance(const State &state, const Position pos)
 {
 	double result = (abs(state.pos1.i - pos.i) / 1.5) + (abs(state.pos1.j - pos.j) / 1.5);
@@ -386,6 +388,9 @@ double calculateDistance(const State &state, const Position pos)
 	return result;
 }
 
+/* Calculates the distance between the block actual position and the next goal,
+   using the block max average velocity (1.5). The next goal is closest button not active (if there are two),
+   or the only non active button or the goal position.                                                        */
 void State::h()
 {
 	if (expandCircle.i != -1 && !expandedCircle)
