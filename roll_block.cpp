@@ -33,6 +33,7 @@ bool checkDone(const shared_ptr<State> &state)
 	return state->pos1 == goal && state->pos2.i == -1 && state->pos2.j == -1;
 }
 
+/* Analyzes the level map and set the info necessary to play the level */
 shared_ptr<State> analyzepuzzle()
 {
 	possible.clear();
@@ -118,6 +119,7 @@ shared_ptr<State> analyzepuzzle()
 	return start;
 }
 
+/* Displays the map level */
 void displaypuzzle(const shared_ptr<State> &state)
 {
 	cout << endl;
@@ -193,6 +195,7 @@ void displaypuzzle(const shared_ptr<State> &state)
 	cout << endl;
 }
 
+/* Display the level map according to the state */
 void displaySolution(shared_ptr<State> state)
 {
 	stack<shared_ptr<State>> way;
@@ -217,6 +220,7 @@ void displaySolution(shared_ptr<State> state)
 	getchar();
 }
 
+/* Solve the map according to a specific algorithm specified by mode parameter */
 void solve(char mode)
 {
 	expanded_nodes = 0;
@@ -226,27 +230,35 @@ void solve(char mode)
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-	switch (mode)
+	try
 	{
-	case '2':
-		end = breadthFirstSearch(start);
-		break;
-	case '3':
-		end = depthFirstSearch(start);
-		break;
-	case '4':
-		end = greedySearch(start);
-		break;
-	case '5':
-		end = aStarSearch(start);
-		break;
-	case '6':
-		end = uniformCostSearch(start);
-		break;
-	case '7':
-		end = iterativeDeepeningSearch(start);
-		break;
-	default:
+		switch (mode)
+		{
+		case '2':
+			end = breadthFirstSearch(start);
+			break;
+		case '3':
+			end = depthFirstSearch(start);
+			break;
+		case '4':
+			end = greedySearch(start);
+			break;
+		case '5':
+			end = aStarSearch(start);
+			break;
+		case '6':
+			end = uniformCostSearch(start);
+			break;
+		case '7':
+			end = iterativeDeepeningSearch(start);
+			break;
+		default:
+			return;
+		}
+	}
+	catch (bad_alloc e)
+	{
+		cout << "The number of expanded nodes was higher than available memory\n\n\n";
 		return;
 	}
 
@@ -269,6 +281,7 @@ void solve(char mode)
 	displaySolution(end);
 }
 
+/* Reads a level from file specified by level parameter */
 void readLevel(char *level)
 {
 	ifstream mapFile;
@@ -301,6 +314,7 @@ void readLevel(char *level)
 	mapFile.close();
 }
 
+/* Allows the user to play the game */
 void play()
 {
 	shared_ptr<State> game_info = analyzepuzzle();
@@ -368,6 +382,7 @@ void play()
 	return;
 }
 
+/* Prints the game menu */
 void printMenu()
 {
 	cout << "  _____       _ _   ____  _            _     \n"
@@ -380,6 +395,7 @@ void printMenu()
 	cout << "\n1. Play.\n2. Breadth-First.\n3. Depth-First.\n4. Greedy.\n5. A*.\n6. Uniform Cost.\n7. Iterative Deepening.\n0. Exit.\n\n\n";
 }
 
+/* Displays the menu and reads user option selection */
 void menu()
 {
 	bool input = true;
