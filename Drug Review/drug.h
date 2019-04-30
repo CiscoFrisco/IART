@@ -1,40 +1,42 @@
 #include <string>
 #include <ctime>
 
+bool iequals(const std::string& a, const std::string& b);
+
 struct Drug {
-    String name;
+    std::string name;
 
     bool operator==(const Drug &other) const
 	{
-		return name == other.name;
+		return iequals(name,other.name);
 	}
 
     bool operator<(const Drug &other) const
 	{
 		return name < other.name;
 	}
-}
+};
 
 struct Condition {
-    String name;
+    std::string name;
 
     bool operator==(const Condition &other) const
 	{
-		return name == other.name;
+		return iequals(name,other.name);
 	}
 
     bool operator<(const Condition &other) const
 	{
 		return name < other.name;
 	}
-}
+};
 
 struct DrugReview {
     int id;
     Drug drug;
     Condition condition;
-    String review;
+    std::string review;
     int rating;
     tm date;
     int usefulCount;
-}
+};
