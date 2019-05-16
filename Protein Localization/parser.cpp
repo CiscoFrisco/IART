@@ -33,9 +33,9 @@ void readTrainFile(vector<Protein> *train, vector<Protein> *test){
         protein.pox = pox*100;
         protein.vac = vac*100;
 
-        int random = rand() % 101;
+        int random = rand() % 100;
 
-        if(random <= (100 - (int) trainPercentage))
+        if(random < (100 - (int) trainPercentage))
             (*test).push_back(protein);
         else
             (*train).push_back(protein);        
