@@ -2,7 +2,9 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <cstdlib>
 
 struct Protein {
 
@@ -13,7 +15,8 @@ struct Protein {
     unsigned short erl;
     unsigned short pox;
     unsigned short vac;
-    std::string nuc;
+    unsigned short nuc;
+    std::string result;
 };
 
-void readTrainFile(std::vector<Protein> *vector);
+void readTrainFile(std::vector<Protein> *train, std::vector<Protein> *test);
