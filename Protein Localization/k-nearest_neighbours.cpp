@@ -9,24 +9,6 @@ bool compareDistance(const Protein &lhs, const Protein &rhs)
 	return (lhs.distance < rhs.distance); 
 }
 
-std::string de_translate(unsigned short res)
-{ 
-		switch(res) {
-			case 0: return "CYT";
-			case 1: return "NUC";
-			case 2: return "MIT";
-			case 3: return "ME3";
-			case 4: return "ME2";
-			case 5: return "ME1";
-			case 6: return "EXC";
-			case 7: return "VAC";
-			case 8: return "POX";
-			case 9: return "ERL";
-		}
-
-		return "";
-}
-
 unsigned short k_nearest(vector<Protein> &proteins, int k, Protein &p) 
 {
 	for(int i = 0; i < proteins.size(); ++i)

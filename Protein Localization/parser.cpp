@@ -24,7 +24,7 @@ void readTrainFile(vector<Protein> *train, vector<Protein> *test){
 
         protein_line >> ignore >> mcg >> gvh >> alm >> mit >> erl >> pox >> vac >> nuc >> result;
 
-		protein.translate(result);
+		protein.result = translate(result);
         protein.mcg = mcg*100;
         protein.gvh = gvh*100;
         protein.alm = alm*100;
