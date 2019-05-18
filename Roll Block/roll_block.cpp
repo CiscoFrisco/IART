@@ -4,7 +4,6 @@
 #include <fstream>
 #include <string>
 #include <conio.h>
-
 #include "operators.h"
 #include "algorithms.h"
 

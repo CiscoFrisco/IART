@@ -1,30 +1,7 @@
-#include <vector>
-#include <iostream>
-#include <cstdlib>
-#include <cassert>
-#include <cmath>
-#include <fstream>
-#include <sstream>
+#include "neural-net.h"
 #include "protein.h"
 
 using namespace std;
-
-class TrainingData
-{
-public:
-	TrainingData(const string filename);
-	bool isEof(void)
-	{
-		return m_trainingDataFile.eof();
-	}
-	void getTopology(vector<unsigned> &topology);
-
-	// Returns the number of input values read from the file:
-	unsigned getNextInputs(vector<double> &inputVals);
-	unsigned getTargetOutputs(vector<double> &targetOutputVals);
-	ifstream m_trainingDataFile;
-	
-};
 
 void TrainingData::getTopology(vector<unsigned> &topology)
 {
@@ -91,53 +68,15 @@ unsigned TrainingData::getTargetOutputs(vector<double> &targetOutputVals)
 		// double oneValueVal;
 		while (ss >> oneValue)
 		{
-			double oneValueVal = translateNN(oneValue);
-			targetOutputVals.push_back(oneValueVal);
+			vector<double> ValueVec = translateNN(oneValue);
+			targetOutputVals = ValueVec;
 		}
 	}
 
 	return targetOutputVals.size();
 }
 
-struct Connection
-{
-	double weight;
-	double deltaWeight;
-};
-
-class Neuron;
-
-typedef vector<Neuron> Layer;
-
 // ****************** class Neuron ******************
-
-class Neuron
-{
-public:
-	Neuron(unsigned numOutputs, unsigned myIndex);
-	void setOutputVal(double val) { m_outputVal = val; }
-	double getOutputVal(void) const { return m_outputVal; }
-	void feedForward(const Layer &prevLayer);
-	void calcOutputGradients(double targetVals);
-	void calcHiddenGradients(const Layer &nextLayer);
-	void updateInputWeights(Layer &prevLayer);
-
-private:
-	static double eta;   // [0.0...1.0] overall net training rate
-	static double alpha; // [0.0...n] multiplier of last weight change [momentum]
-	static double transferFunction(double x);
-	static double transferFunctionDerivative(double x);
-	// randomWeight: 0 - 1
-	static double randomWeight(void) { return rand() / double(RAND_MAX); }
-	double sumDOW(const Layer &nextLayer) const;
-	double m_outputVal;
-	vector<Connection> m_outputWeights;
-	unsigned m_myIndex;
-	double m_gradient;
-};
-
-double Neuron::eta = 0.01;   // overall net learning rate
-double Neuron::alpha = 0.5; // momentum, multiplier of last deltaWeight, [0.0..n]
 
 void Neuron::updateInputWeights(Layer &prevLayer)
 {
@@ -175,13 +114,28 @@ double Neuron::sumDOW(const Layer &nextLayer) const
 void Neuron::calcHiddenGradients(const Layer &nextLayer)
 {
 	double dow = sumDOW(nextLayer);
-	m_gradient = dow * Neuron::transferFunctionDerivative(m_outputVal);
+	m_gradient = dow * Neuron::transferFunctionDerivative(m_inputVal); // NOT m_outputVal
 }
+
 void Neuron::calcOutputGradients(double targetVals)
 {
 	double delta = targetVals - m_outputVal;
-	m_gradient = delta * Neuron::transferFunctionDerivative(m_outputVal);
+	m_gradient = delta * Neuron::transferFunctionDerivative(m_inputVal); // NOT m_outputVal
 }
+
+double Neuron::eta = 0.25;  // overall net learning rate
+double Neuron::alpha = 0.1; // momentum, multiplier of last deltaWeight, [0.0..n]
+
+// void Neuron::calcHiddenGradients(const Layer &nextLayer)
+// {
+// 	double dow = sumDOW(nextLayer);
+// 	m_gradient = dow * Neuron::transferFunctionDerivative(m_outputVal);
+// }
+// void Neuron::calcOutputGradients(double targetVals)
+// {
+// 	double delta = targetVals - m_outputVal;
+// 	m_gradient = delta * Neuron::transferFunctionDerivative(m_outputVal);
+// }
 
 double Neuron::transferFunction(double x)
 {
@@ -192,8 +146,14 @@ double Neuron::transferFunction(double x)
 double Neuron::transferFunctionDerivative(double x)
 {
 	// tanh derivative
-	return 1.0 - x * x;
+	return 1.0 - tanh(x) * tanh(x);
 }
+
+// double Neuron::transferFunctionDerivative(double x)
+// {
+// 	// tanh derivative
+// 	return 1.0 - x * x;
+// }
 
 void Neuron::feedForward(const Layer &prevLayer)
 {
@@ -208,6 +168,7 @@ void Neuron::feedForward(const Layer &prevLayer)
 			   prevLayer[n].m_outputWeights[m_myIndex].weight;
 	}
 
+	m_inputVal = sum;
 	m_outputVal = Neuron::transferFunction(sum);
 }
 
@@ -222,22 +183,6 @@ Neuron::Neuron(unsigned numOutputs, unsigned myIndex)
 	m_myIndex = myIndex;
 }
 // ****************** class Net ******************
-class Net
-{
-public:
-	Net(const vector<unsigned> &topology);
-	void feedForward(const vector<double> &inputVals);
-	void backProp(const vector<double> &targetVals);
-	void getResults(vector<double> &resultVals) const;
-	double getRecentAverageError(void) const { return m_recentAverageError; }
-
-private:
-	vector<Layer> m_layers; //m_layers[layerNum][neuronNum]
-	double m_error;
-	double m_recentAverageError;
-	static double m_recentAverageSmoothingFactor;
-};
-
 double Net::m_recentAverageSmoothingFactor = 100.0; // Number of training samples to average over
 
 void Net::getResults(vector<double> &resultVals) const
@@ -354,73 +299,72 @@ void showVectorVals(string label, vector<double> &v)
 	{
 		cout << v[i] << " ";
 	}
+
 	cout << endl;
 }
 
-void showTargetVals(string label, vector<double> &v)
+void showTargetVals(string label, int index)
 {
-	cout << label << " ";
-	for (unsigned i = 0; i < v.size(); ++i)
-	{
-		cout << de_translateNN(v[i]) << " ";
-	}
-	cout << endl;
+	cout << " | " << de_translate(index) << endl;
 }
 
-int main()
+void trainNeuralNetwork(TrainingData *trainData, Net myNet, vector<unsigned> topology)
 {
-	TrainingData trainData("training_yeast.txt");
-	vector<unsigned> topology;
-
-	trainData.getTopology(topology);
-	Net myNet(topology);
-
 	vector<double> inputVals, targetVals, resultVals;
 	int trainingPass = 0;
-	int equal = 0;
-	for (int i = 0; i < 10; i++)
+	int correct = 0;
+
+	unsigned short correctPred[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	unsigned short sumReal[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	unsigned short sumPred[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+	int i;
+	for (i = 0; i < 10; i++)
 	{
-		while (!trainData.isEof())
+		while (!(*trainData).isEof())
 		{
 			++trainingPass;
-			cout << endl
-				 << "Pass" << trainingPass;
+			// cout << endl << "Pass" << trainingPass;
 
 			// Get new input data and feed it forward:
-			if (trainData.getNextInputs(inputVals) != topology[0])
+			if ((*trainData).getNextInputs(inputVals) != topology[0])
 				break;
-			showVectorVals(": Inputs :", inputVals);
+			// showVectorVals(": Inputs :", inputVals);
 			myNet.feedForward(inputVals);
 
 			// Collect the net's actual results:
 			myNet.getResults(resultVals);
-			showTargetVals("Output:", resultVals);
+			int maxRes_i = distance(resultVals.begin(), max_element(resultVals.begin(), resultVals.end()));
+			sumPred[maxRes_i]++;
+			// showVectorVals("Output:", resultVals);
+			// showTargetVals("Output String:", maxRes_i);
 
 			// Train the net what the outputs should have been:
-			trainData.getTargetOutputs(targetVals);
-			showTargetVals("Target:", targetVals);
+			(*trainData).getTargetOutputs(targetVals);
+			int maxTarget_i = distance(targetVals.begin(), max_element(targetVals.begin(), targetVals.end()));
+			sumReal[maxTarget_i]++;
+			// showVectorVals("Target:", targetVals);
+			// showTargetVals("Target String:", maxTarget_i);
 			assert(targetVals.size() == topology.back());
 
-			if (de_translateNN(targetVals[0]) == de_translateNN(resultVals[0]))
-				equal++;
+			if (maxRes_i == maxTarget_i){
+				correctPred[maxRes_i]++;
+				correct++;
+			}
 
 			myNet.backProp(targetVals);
 
 			// Report how well the training is working, average over recnet
-			cout << "Net recent average error: "
-				 << myNet.getRecentAverageError() << endl;
+			// cout << "Net recent average error: " << myNet.getRecentAverageError() << endl;
 		}
 
-		trainData.m_trainingDataFile.close();
-		trainData.m_trainingDataFile.open("training_yeast.txt");
+		(*trainData).m_trainingDataFile.close();
+		(*trainData).m_trainingDataFile.open("training_yeast.txt");
 		string waste;
-		getline(trainData.m_trainingDataFile, waste);
+		getline((*trainData).m_trainingDataFile, waste);
 	}
 
-	cout << endl
-		 << "Done" << endl;
-	cout << endl
-		 << equal << endl;
-	cout << endl
-		 << trainingPass << endl;
+	cout << "Accuracy: " << ((float) correct / (trainingPass - i)) * 100.0 << "%\n\n";
+
+	showStats(correctPred, sumReal, sumPred, trainingPass - i);
 }

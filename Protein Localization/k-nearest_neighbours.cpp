@@ -60,21 +60,7 @@ void k_nearest_evaluate(vector<Protein> &train, vector<Protein> &test) {
 
 	cout << "Accuracy: " << ((float) correct / test.size()) * 100.0 << "%\n\n";
 
-	for(int i = 0; i < 10; ++i) {
-		int vp = correctPred[i];
-		int fn = sumReal[i] - correctPred[i];
-		int fp = sumPred[i] - correctPred[i];
-		int vn = test.size() - sumReal[i] - sumPred[i] + correctPred[i];
-
-		cout << "Class: " << de_translate(i);
-		cout << " VP: " << vp << " FN: " << fn << " FP: " << fp << " VN: " << vn;
-		cout << " Accuracy: " << (float) (vp + vn) / (vp + fn + fp + vn);
-		cout << " Precision: " << (float) vp / (vp + fp);
-		cout << " F-measure: " << (2.0 * vp) / ((2.0 * vp) + fn + fp);
-
-
-		cout << endl; 
-	}
+	showStats(correctPred, sumReal, sumPred, test.size());
 
 	cout << endl;
 }

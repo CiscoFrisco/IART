@@ -1,4 +1,9 @@
 #include "protein.h"
+#include <sstream>
+#include <fstream>
+#include <ctime>
+
+
 
 using namespace std;
 
