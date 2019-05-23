@@ -107,7 +107,8 @@ void TrainingData::getFileAttributes(vector<vector<double>> &inputTestVals, vect
 					inputTestVals.push_back(oneIn);
 					outputTestVals.push_back(oneOut);
 				}
-				else{
+				else
+				{
 					inputTrainVals.push_back(oneIn);
 					outputTrainVals.push_back(oneOut);
 				}
@@ -398,8 +399,6 @@ void trainNeuralNetwork(TrainingData *trainData, Net myNet, vector<unsigned> top
 
 	cout << endl;
 
-	cout << inputTestVals.size() << "| " << outputTestVals.size() << " | " << inputTrainVals.size() << " | " << outputTrainVals.size() << endl;
-
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
 	for (i = 0; i < epochs; i++)
@@ -441,6 +440,42 @@ void trainNeuralNetwork(TrainingData *trainData, Net myNet, vector<unsigned> top
 		trainingPass = 0;
 		correct = 0;
 	}
+
+	trainingPass = 0;
+	correct = 0;
+
+	while (trainingPass < outputTestVals.size())
+	{
+		// Get new input data and feed it forward:
+		// showVectorVals("Inputs :", inputVals[trainingPass]);
+		myNet.feedForward(inputTestVals[trainingPass]);
+
+		// Collect the net's actual results:
+		myNet.getResults(resultVals);
+
+		int maxRes_i = distance(resultVals.begin(), max_element(resultVals.begin(), resultVals.end()));
+		sumPred[maxRes_i]++;
+		// showVectorVals("Output:", resultVals);
+		// showTargetVals("Output String:", maxRes_i);
+
+		// Train the net what the outputs should have been:
+		int maxTarget_i = distance(outputTestVals[trainingPass].begin(), max_element(outputTestVals[trainingPass].begin(), outputTestVals[trainingPass].end()));
+		sumReal[maxTarget_i]++;
+		// showVectorVals("Target:", targetVals[trainingPass]);
+		// showTargetVals("Target String:", maxTarget_i);
+
+		if (maxRes_i == maxTarget_i)
+		{
+			correctPred[maxRes_i]++;
+			correct++;
+		}
+
+		myNet.backProp(outputTestVals[trainingPass]);
+		trainingPass++;
+	}
+
+	cout << "\nTest: " << " | "
+		 << "Accuracy: " << ((float)correct / (float)trainingPass) * 100.0 << "%\n\n";
 
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	auto duration = duration_cast<microseconds>(t2 - t1).count();
