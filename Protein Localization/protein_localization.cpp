@@ -8,6 +8,7 @@ using namespace std::chrono;
 
 int main()
 {
+	srand(time(NULL));
     int method;
 
     do
@@ -59,19 +60,19 @@ void runC45()
 {
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-    MatrixCls Matrix("yeast.dat");
-    cout << Matrix.SizeY() << endl
+    MatrixCls Matrix("yeast.dat", 98);
+    cout << "Training Size: " << Matrix.SizeY() - 2 << endl
          << endl;
     TreeCls *Tree;
     Tree = Tree->BuildTree(NULL, Matrix);
     Tree->Display();
-    vector<string> Test_Scores = Tree->TestTree(Matrix);
-    DisplayVector(Test_Scores);
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(t2 - t1).count();
 
     cout << "\nDuration: " << (float)duration / 1000000 << " seconds.\n";
+
+	Tree->TestTree(Matrix);
 }
 
 void runNeuralNetwork()
@@ -126,6 +127,8 @@ unsigned short translate(std::string resultName)
         return 8;
     else if (resultName == "ERL")
         return 9;
+
+	return 1000;
 }
 
 std::vector<double> translateNN(std::string resultName)

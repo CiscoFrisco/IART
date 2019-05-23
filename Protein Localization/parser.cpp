@@ -10,7 +10,6 @@ using namespace std;
 void readTrainFile(vector<Protein> *train, vector<Protein> *test){
     
     ifstream file("yeast.data");
-    srand (time(NULL));
 
 	float trainPercentage;
 
