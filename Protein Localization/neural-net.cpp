@@ -54,61 +54,66 @@ unsigned TrainingData::getNextInputs(vector<double> &inputVals)
 	return inputVals.size();
 }
 
-unsigned TrainingData::getInputs(vector<vector<double>> &inputVals)
+void TrainingData::getFileAttributes(vector<vector<double>> &inputTestVals, vector<vector<double>> &inputTrainVals, vector<vector<double>> &outputTestVals, vector<vector<double>> &outputTrainVals, int trainPercentage)
 {
-	inputVals.clear();
+	inputTestVals.clear();
+	inputTrainVals.clear();
+	outputTestVals.clear();
+	outputTrainVals.clear();
+
+	int random;
 
 	while (!m_trainingDataFile.eof())
 	{
-		string line;
-		getline(m_trainingDataFile, line);
-		stringstream ss(line);
+		random = rand() % 100;
 
-		string label;
-		ss >> label;
+		string line_in;
+		getline(m_trainingDataFile, line_in);
+		stringstream ss_in(line_in);
 
-		if (label.compare("in:") == 0)
+		string label_in;
+		ss_in >> label_in;
+
+		if (label_in.compare("in:") == 0)
 		{
 			vector<double> oneIn;
-			double oneValue;
+			double inValue;
 
-			while (ss >> oneValue)
+			while (ss_in >> inValue)
 			{
-				oneIn.push_back(oneValue);
+				oneIn.push_back(inValue);
 			}
 
-			inputVals.push_back(oneIn);
-		}
-	}
+			string line_out;
+			getline(m_trainingDataFile, line_out);
+			stringstream ss_out(line_out);
 
-	return inputVals.size();
-}
+			string label_out;
+			ss_out >> label_out;
 
-unsigned TrainingData::getTarget(vector<vector<double>> &targetOutputVals)
-{
-	targetOutputVals.clear();
-
-	while (!m_trainingDataFile.eof())
-	{
-		string line;
-		getline(m_trainingDataFile, line);
-		stringstream ss(line);
-
-		string label;
-		ss >> label;
-		if (label.compare("out:") == 0)
-		{
-			string oneValue;
-			vector<double> ValueVec;
-			while (ss >> oneValue)
+			if (label_out.compare("out:") == 0)
 			{
-				ValueVec = translateNN(oneValue);
-				targetOutputVals.push_back(ValueVec);
+				vector<double> oneOut;
+				string outValue;
+
+				while (ss_out >> outValue)
+				{
+					vector<double> ValueVec = translateNN(outValue);
+					oneOut = ValueVec;
+				}
+
+				if (random < (100 - trainPercentage))
+				{
+					inputTestVals.push_back(oneIn);
+					outputTestVals.push_back(oneOut);
+				}
+				else{
+					inputTrainVals.push_back(oneIn);
+					outputTrainVals.push_back(oneOut);
+				}
 			}
 		}
 	}
-
-	return targetOutputVals.size();
 }
 
 unsigned TrainingData::getTargetOutputs(vector<double> &targetOutputVals)
@@ -369,37 +374,41 @@ void showTargetVals(string label, int index)
 
 void trainNeuralNetwork(TrainingData *trainData, Net myNet, vector<unsigned> topology)
 {
-	vector<vector<double>> inputVals, targetVals;
+	vector<vector<double>> inputTrainVals, inputTestVals, outputTrainVals, outputTestVals;
 	vector<double> resultVals;
 	int trainingPass = 0;
 	int correct = 0;
+	int trainPercentage;
 
 	unsigned short correctPred[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	unsigned short sumReal[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	unsigned short sumPred[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-	(*trainData).getInputs(inputVals);
+	cout << "Insert train percentage: ";
+	cin >> trainPercentage;
+
+	(*trainData).getFileAttributes(inputTestVals, inputTrainVals, outputTestVals, outputTrainVals, trainPercentage);
 	(*trainData).m_trainingDataFile.close();
 	(*trainData).m_trainingDataFile.open("training_yeast.txt");
-	(*trainData).getTarget(targetVals);
 
-	int i,epochs;
+	int i, epochs;
 
 	cout << "\nInsert the number of epochs:";
 	cin >> epochs;
-	
+
 	cout << endl;
+
+	cout << inputTestVals.size() << "| " << outputTestVals.size() << " | " << inputTrainVals.size() << " | " << outputTrainVals.size() << endl;
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-	
 	for (i = 0; i < epochs; i++)
 	{
-		while (trainingPass < targetVals.size())
+		while (trainingPass < outputTrainVals.size())
 		{
 			// Get new input data and feed it forward:
 			// showVectorVals("Inputs :", inputVals[trainingPass]);
-			myNet.feedForward(inputVals[trainingPass]);
+			myNet.feedForward(inputTrainVals[trainingPass]);
 
 			// Collect the net's actual results:
 			myNet.getResults(resultVals);
@@ -410,7 +419,7 @@ void trainNeuralNetwork(TrainingData *trainData, Net myNet, vector<unsigned> top
 			// showTargetVals("Output String:", maxRes_i);
 
 			// Train the net what the outputs should have been:
-			int maxTarget_i = distance(targetVals[trainingPass].begin(), max_element(targetVals[trainingPass].begin(), targetVals[trainingPass].end()));
+			int maxTarget_i = distance(outputTrainVals[trainingPass].begin(), max_element(outputTrainVals[trainingPass].begin(), outputTrainVals[trainingPass].end()));
 			sumReal[maxTarget_i]++;
 			// showVectorVals("Target:", targetVals[trainingPass]);
 			// showTargetVals("Target String:", maxTarget_i);
@@ -421,12 +430,13 @@ void trainNeuralNetwork(TrainingData *trainData, Net myNet, vector<unsigned> top
 				correct++;
 			}
 
-			myNet.backProp(targetVals[trainingPass]);
+			myNet.backProp(outputTrainVals[trainingPass]);
 
 			trainingPass++;
 		}
 
-		cout << "Epoch: " << (i + 1) << " | " << "Accuracy: " << ((float)correct / (float) trainingPass) * 100.0 << "%\n\n";
+		cout << "Epoch: " << (i + 1) << " | "
+			 << "Accuracy: " << ((float)correct / (float)trainingPass) * 100.0 << "%\n\n";
 
 		trainingPass = 0;
 		correct = 0;
@@ -437,5 +447,5 @@ void trainNeuralNetwork(TrainingData *trainData, Net myNet, vector<unsigned> top
 
 	cout << "\nDuration: " << (float)duration / 1000000 << " seconds.\n";
 
-	showStats(correctPred, sumReal, sumPred, trainingPass - i);
+	// showStats(correctPred, sumReal, sumPred, trainingPass - i);
 }
