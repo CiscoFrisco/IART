@@ -16,8 +16,6 @@ int main()
 
         cin >> method;
 
-        high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
         switch (method)
         {
         case 1:
@@ -33,11 +31,6 @@ int main()
             break;
         }
 
-        high_resolution_clock::time_point t2 = high_resolution_clock::now();
-        auto duration = duration_cast<microseconds>(t2 - t1).count();
-
-        cout << "\nDuration: " << (float)duration / 1000000 << " seconds.\n";
-
     } while (method != 0);
 
     return 0;
@@ -47,7 +40,7 @@ void displayMenu()
 {
     cout << "\n=====Protein Localization=====\n\n";
     cout << "Choose your Method:\n";
-    cout << "1. K Nearest Neighbours\n2.C4.5\n3.Neural Network\n";
+    cout << "1. K Nearest Neighbours\n2. C 4.5\n3. Neural Network\n\n";
 }
 
 void runKNN()
@@ -64,6 +57,8 @@ void runKNN()
 
 void runC45()
 {
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
     MatrixCls Matrix("yeast.dat");
     cout << Matrix.SizeY() << endl
          << endl;
@@ -72,6 +67,11 @@ void runC45()
     Tree->Display();
     vector<string> Test_Scores = Tree->TestTree(Matrix);
     DisplayVector(Test_Scores);
+
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(t2 - t1).count();
+
+    cout << "\nDuration: " << (float)duration / 1000000 << " seconds.\n";
 }
 
 void runNeuralNetwork()
@@ -87,7 +87,6 @@ void runNeuralNetwork()
 
 void showStats(unsigned short correctPred[], unsigned short sumReal[], unsigned short sumPred[], unsigned short test)
 {
-
     for (int i = 0; i < 10; ++i)
     {
         int vp = correctPred[i];

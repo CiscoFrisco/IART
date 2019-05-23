@@ -1,7 +1,9 @@
 #include "neural-net.h"
 #include "protein.h"
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 void TrainingData::getTopology(vector<unsigned> &topology)
 {
@@ -50,6 +52,63 @@ unsigned TrainingData::getNextInputs(vector<double> &inputVals)
 	}
 
 	return inputVals.size();
+}
+
+unsigned TrainingData::getInputs(vector<vector<double>> &inputVals)
+{
+	inputVals.clear();
+
+	while (!m_trainingDataFile.eof())
+	{
+		string line;
+		getline(m_trainingDataFile, line);
+		stringstream ss(line);
+
+		string label;
+		ss >> label;
+
+		if (label.compare("in:") == 0)
+		{
+			vector<double> oneIn;
+			double oneValue;
+
+			while (ss >> oneValue)
+			{
+				oneIn.push_back(oneValue);
+			}
+
+			inputVals.push_back(oneIn);
+		}
+	}
+
+	return inputVals.size();
+}
+
+unsigned TrainingData::getTarget(vector<vector<double>> &targetOutputVals)
+{
+	targetOutputVals.clear();
+
+	while (!m_trainingDataFile.eof())
+	{
+		string line;
+		getline(m_trainingDataFile, line);
+		stringstream ss(line);
+
+		string label;
+		ss >> label;
+		if (label.compare("out:") == 0)
+		{
+			string oneValue;
+			vector<double> ValueVec;
+			while (ss >> oneValue)
+			{
+				ValueVec = translateNN(oneValue);
+				targetOutputVals.push_back(ValueVec);
+			}
+		}
+	}
+
+	return targetOutputVals.size();
 }
 
 unsigned TrainingData::getTargetOutputs(vector<double> &targetOutputVals)
@@ -251,7 +310,7 @@ void Net::backProp(const std::vector<double> &targetVals)
 void Net::feedForward(const vector<double> &inputVals)
 {
 	// Check the num of inputVals euqal to neuronnum expect bias
-	assert(inputVals.size() == m_layers[0].size() - 1);
+	// assert(inputVals.size() == m_layers[0].size() - 1);
 
 	// Assign {latch} the input values into the input neurons
 	for (unsigned i = 0; i < inputVals.size(); ++i)
@@ -310,7 +369,8 @@ void showTargetVals(string label, int index)
 
 void trainNeuralNetwork(TrainingData *trainData, Net myNet, vector<unsigned> topology)
 {
-	vector<double> inputVals, targetVals, resultVals;
+	vector<vector<double>> inputVals, targetVals;
+	vector<double> resultVals;
 	int trainingPass = 0;
 	int correct = 0;
 
@@ -318,53 +378,64 @@ void trainNeuralNetwork(TrainingData *trainData, Net myNet, vector<unsigned> top
 	unsigned short sumReal[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	unsigned short sumPred[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-	int i;
-	for (i = 0; i < 10; i++)
-	{
-		while (!(*trainData).isEof())
-		{
-			++trainingPass;
-			// cout << endl << "Pass" << trainingPass;
+	(*trainData).getInputs(inputVals);
+	(*trainData).m_trainingDataFile.close();
+	(*trainData).m_trainingDataFile.open("training_yeast.txt");
+	(*trainData).getTarget(targetVals);
 
+	int i,epochs;
+
+	cout << "\nInsert the number of epochs:";
+	cin >> epochs;
+	
+	cout << endl;
+
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
+	
+	for (i = 0; i < epochs; i++)
+	{
+		while (trainingPass < targetVals.size())
+		{
 			// Get new input data and feed it forward:
-			if ((*trainData).getNextInputs(inputVals) != topology[0])
-				break;
-			// showVectorVals(": Inputs :", inputVals);
-			myNet.feedForward(inputVals);
+			// showVectorVals("Inputs :", inputVals[trainingPass]);
+			myNet.feedForward(inputVals[trainingPass]);
 
 			// Collect the net's actual results:
 			myNet.getResults(resultVals);
+
 			int maxRes_i = distance(resultVals.begin(), max_element(resultVals.begin(), resultVals.end()));
 			sumPred[maxRes_i]++;
 			// showVectorVals("Output:", resultVals);
 			// showTargetVals("Output String:", maxRes_i);
 
 			// Train the net what the outputs should have been:
-			(*trainData).getTargetOutputs(targetVals);
-			int maxTarget_i = distance(targetVals.begin(), max_element(targetVals.begin(), targetVals.end()));
+			int maxTarget_i = distance(targetVals[trainingPass].begin(), max_element(targetVals[trainingPass].begin(), targetVals[trainingPass].end()));
 			sumReal[maxTarget_i]++;
-			// showVectorVals("Target:", targetVals);
+			// showVectorVals("Target:", targetVals[trainingPass]);
 			// showTargetVals("Target String:", maxTarget_i);
-			assert(targetVals.size() == topology.back());
 
-			if (maxRes_i == maxTarget_i){
+			if (maxRes_i == maxTarget_i)
+			{
 				correctPred[maxRes_i]++;
 				correct++;
 			}
 
-			myNet.backProp(targetVals);
+			myNet.backProp(targetVals[trainingPass]);
 
-			// Report how well the training is working, average over recnet
-			// cout << "Net recent average error: " << myNet.getRecentAverageError() << endl;
+			trainingPass++;
 		}
 
-		(*trainData).m_trainingDataFile.close();
-		(*trainData).m_trainingDataFile.open("training_yeast.txt");
-		string waste;
-		getline((*trainData).m_trainingDataFile, waste);
+		cout << "Epoch: " << (i + 1) << " | " << "Accuracy: " << ((float)correct / (float) trainingPass) * 100.0 << "%\n\n";
+
+		trainingPass = 0;
+		correct = 0;
 	}
 
-	cout << "Accuracy: " << ((float) correct / (trainingPass - i)) * 100.0 << "%\n\n";
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(t2 - t1).count();
+
+	cout << "\nDuration: " << (float)duration / 1000000 << " seconds.\n";
 
 	showStats(correctPred, sumReal, sumPred, trainingPass - i);
 }

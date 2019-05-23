@@ -42,6 +42,6 @@ void runNeuralNetwork();
 void readTrainFile(std::vector<Protein> *train, std::vector<Protein> *test);
 bool compareDistance(const Protein &lhs, const Protein &rhs);
 unsigned short k_nearest(std::vector<Protein> &proteins, int k, Protein &p);
-void k_nearest_evaluate(std::vector<Protein> &train, std::vector<Protein> &test);
+void k_nearest_evaluate(std::vector<Protein> &train, std::vector<Protein> &test );
 void displayMenu();
 void showStats(unsigned short correctPred[], unsigned short sumReal[], unsigned short sumPred[], unsigned short test);

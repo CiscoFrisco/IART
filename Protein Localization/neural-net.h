@@ -21,6 +21,8 @@ public:
     // Returns the number of input values read from the file:
     unsigned getNextInputs(std::vector<double> &inputVals);
     unsigned getTargetOutputs(std::vector<double> &targetOutputVals);
+    unsigned getInputs(std::vector<std::vector<double>> &inputVals);
+    unsigned getTarget(std::vector<std::vector<double>> &targetVals);
     std::ifstream m_trainingDataFile;
 };
 
