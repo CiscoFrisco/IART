@@ -1,3 +1,7 @@
+/**
+ * Adapted from https://github.com/huangzehao/SimpleNeuralNetwork
+ **/
+
 #include "neural-net.h"
 #include "protein.h"
 #include <chrono>

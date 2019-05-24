@@ -1,3 +1,7 @@
+/**
+ * Adapted from https://github.com/zgyao/DecisionTree_C4.5
+ **/
+
 #include <iostream>
 #include <fstream>
 #include <string>

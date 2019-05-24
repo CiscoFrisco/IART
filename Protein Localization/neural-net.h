@@ -1,3 +1,7 @@
+/**
+ * Adapted from https://github.com/huangzehao/SimpleNeuralNetwork
+ **/
+
 #include <vector>
 #include <iostream>
 #include <cstdlib>

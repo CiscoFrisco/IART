@@ -6,12 +6,17 @@
 using namespace std;
 using namespace std::chrono;
 
-
+/**
+ * Compares distance from two Proteins
+ **/
 bool compareDistance(const Protein &lhs, const Protein &rhs)
 {
 	return (lhs.distance < rhs.distance);
 }
 
+/**
+ * K-Nearest neighbor algorithm, adapted to our problem
+ **/
 unsigned short k_nearest(vector<Protein> &proteins, int k, Protein &p)
 {
 	for (int i = 0; i < proteins.size(); ++i)
@@ -31,6 +36,9 @@ unsigned short k_nearest(vector<Protein> &proteins, int k, Protein &p)
 	return max_element(frequency, frequency + 10) - frequency;
 }
 
+/**
+ * Test and evalutes k-nearest neighbor algorithm performance
+ **/
 void k_nearest_evaluate(vector<Protein> &train, vector<Protein> &test)
 {
 

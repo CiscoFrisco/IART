@@ -17,6 +17,10 @@ struct Protein
 	unsigned short result;
 	float distance;
 
+
+	/**
+	 * Calculates distance between this protein and another, based on the euclidian distance between their attributes
+	 **/
 	void calculateDistance(const Protein &p)
 	{
 		distance = sqrt(

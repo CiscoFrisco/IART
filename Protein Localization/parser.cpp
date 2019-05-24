@@ -3,10 +3,11 @@
 #include <fstream>
 #include <ctime>
 
-
-
 using namespace std;
 
+/**
+ * Reads dataset entries from yeast.data file and stores them in Protein classes.
+ **/
 void readTrainFile(vector<Protein> *train, vector<Protein> *test){
     
     ifstream file("yeast.data");

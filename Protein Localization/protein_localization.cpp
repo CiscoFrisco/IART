@@ -37,6 +37,9 @@ int main()
     return 0;
 }
 
+/**
+ * Displays program menu
+ **/
 void displayMenu()
 {
     cout << "\n=====Protein Localization=====\n\n";
@@ -44,6 +47,9 @@ void displayMenu()
     cout << "1. K Nearest Neighbours\n2. C 4.5\n3. Neural Network\n\n";
 }
 
+/**
+ * Runs k-nearest neighbor algorithm 
+ **/
 void runKNN()
 {
     vector<Protein> train;
@@ -56,6 +62,9 @@ void runKNN()
          << "TEST: " << test.size() << endl;
 }
 
+/**
+ * Runs c4.5 algorithm
+ **/
 void runC45()
 {
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -75,6 +84,9 @@ void runC45()
 	Tree->TestTree(Matrix);
 }
 
+/**
+ * Runs neural network algorithm
+ **/
 void runNeuralNetwork()
 {
     TrainingData trainData("training_yeast.txt");
@@ -86,6 +98,9 @@ void runNeuralNetwork()
     trainNeuralNetwork(&trainData, myNet, topology);
 }
 
+/**
+ * Displays testing stats
+ **/
 void showStats(unsigned short correctPred[], unsigned short sumReal[], unsigned short sumPred[], unsigned short test)
 {
     for (int i = 0; i < 10; ++i)
@@ -105,6 +120,9 @@ void showStats(unsigned short correctPred[], unsigned short sumReal[], unsigned 
     }
 }
 
+/**
+ * Translates a protein location value to an internal unsigned short representation
+ **/
 unsigned short translate(std::string resultName)
 {
     if (resultName == "CYT")
@@ -131,6 +149,9 @@ unsigned short translate(std::string resultName)
 	return 1000;
 }
 
+/**
+ * Translates a protein location value to a vector of neural network outputs
+ **/
 std::vector<double> translateNN(std::string resultName)
 {
     if (resultName == "CYT")
@@ -155,6 +176,9 @@ std::vector<double> translateNN(std::string resultName)
         return {0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 }
 
+/**
+ * De-translates an internal unsigned short representation to a protein location value
+ **/
 std::string de_translate(unsigned short res)
 {
     switch (res)
